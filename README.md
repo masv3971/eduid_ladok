@@ -8,7 +8,9 @@ make build-static
 ```
 
 ## Flow
-```mermaid
+This is the general flow for each school using this.
+
+```
 graph LR
     ladok -->|atom| eduid_ladok
     ladok -->|rest| eduid_ladok
