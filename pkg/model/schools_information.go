@@ -1,0 +1,46 @@
+package model
+
+// Schools consists of all ladok access schools
+var Schools = map[string]string{
+	"bth": "blekinge tekniska högskola",
+	"cth": "Chalmers tekniska högskola",
+	"ehs": "Enskilda Högskolan Stockholm",
+	"esh": "Ersta Sköndal Bräcke högskola",
+	"fhs": "Försvarshögskolan",
+	"ghi": "Gymnastik- och idrottshögskolan",
+	"gu":  "Göteborgs universitet",
+	"hda": "Högskolan Dalarna",
+	"hb":  "Högskolan i Borås",
+	"hig": "Högskolan i Gävle",
+	"hh":  "Högskolan i Halmstad",
+	"hs":  "Högskolan i Skövde",
+	"hkr": "Högskolan Kristianstad",
+	"hv":  "Högskolan Väst",
+	"kau": "Karlstads universitet",
+	"ki":  "Karolinska institutet",
+	"kf":  "konstfack",
+	"kkh": "Kungl. Konsthögskolan",
+	"kmh": "Kungl. Musikhögskolan i Stockholm",
+	"kth": "kungliga tekniska högskolan",
+	"liu": "Linköpings universitet",
+	"lnu": "linne universitetet",
+	"ltu": "Luleå tekniska universitet",
+	"lu":  "Lunds universitet",
+	"mau": "Malmö universitet",
+	"miu": "Mittuniversitetet",
+	"mdh": "Mälardalens högskola",
+	"ni":  "Newmaninstitutet",
+	"rkh": "Röda Korsets högskola",
+	"shh": "Sophiahemmet Högskola",
+	"hj":  "Stiftelsen Högskolan i Jönköping",
+	"skh": "Stockholms konstnärliga högskola",
+	"su":  "Stockholms universitet",
+	"slu": "Sveriges lantbruksuniversitet",
+	"sh":  "Södertörns högskola",
+	"umu": "Umeå universitet",
+	"uu":  "Uppsala universitet",
+	"oru": "Örebro universitet",
+}
+
+// SchoolsList a list of abbreviated school names
+var SchoolsList = []string{"bth", "cth", "ehs", "esh", "fhs", "ghi", "gu", "hda", "hb", "hig", "hh", "hs", "hkr", "hv", "kau", "ki", "kf", "kkh", "kmh", "kth", "liu", "lnu", "ltu", "lu", "mau", "miu", "mdh", "ni", "rkh", "shh", "hj", "skh", "su", "slu", "sh", "umu", "uu", "oru"}
