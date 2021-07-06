@@ -4,7 +4,10 @@ Integration between eduid and ladok
 ## Build
 ```
 # Linux
-make build-static
+$ make
+
+# mac m1
+$ make mac_m1
 ```
 
 ## Flow
