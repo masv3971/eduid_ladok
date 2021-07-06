@@ -4,7 +4,10 @@ import (
 	"context"
 	"eduid_ladok/internal/eduid_ladok/aggregate"
 	"eduid_ladok/internal/eduid_ladok/eduidiam"
+	"eduid_ladok/internal/eduid_ladok/httpserver"
+	"eduid_ladok/internal/eduid_ladok/internalapi"
 	"eduid_ladok/internal/eduid_ladok/ladok"
+	"eduid_ladok/internal/eduid_ladok/publicapi"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
 	"os"
@@ -14,8 +17,6 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 )
-
-// "Always close a channel on the producer side"
 
 type config struct {
 	SchoolNames []string `required:"true" split_words:"true"`
@@ -79,6 +80,36 @@ func main() {
 
 		services[schoolName] = s
 	}
+
+	s := make(map[string]service)
+
+	var httpserverCfg httpserver.Config
+	if err := envconfig.Process("", &httpserverCfg); err != nil {
+		panic(err)
+	}
+	var internalAPICfg internalapi.Config
+	if err := envconfig.Process("", &internalAPICfg); err != nil {
+		panic(err)
+	}
+	var publicAPICfg publicapi.Config
+	if err := envconfig.Process("", &publicAPICfg); err != nil {
+		panic(err)
+	}
+
+	internalAPI, err := internalapi.New(internalAPICfg, log.New("internalAPI"))
+	if err != nil {
+		panic(err)
+	}
+	publicAPI, err := publicapi.New(publicAPICfg, log.New("publicAPI"))
+	if err != nil {
+		panic(err)
+	}
+	httpserver, err := httpserver.New(httpserverCfg, internalAPI, publicAPI, log.New("httpserver"))
+	s["httpserver"] = httpserver
+	if err != nil {
+		panic(err)
+	}
+	services["core"] = s
 
 	// Handle sigterm and await termChan signal
 	termChan := make(chan os.Signal, 1)

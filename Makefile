@@ -4,7 +4,7 @@ NAME 					:= eduid_ladok
 VERSION                 := $(shell cat VERSION)
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 
-default: build-eduid_ladok-arm
+default: build-eduid_ladok-arm build-fake_environment-arm
 
 build-eduid_ladok-arm:
 		@echo building eduid_ladok for darwin on arm
