@@ -10,7 +10,7 @@ import (
 
 // GetStudent return student information from ladok
 func (s *RestService) GetStudent(studentUID model.StudentUID) (*model.SIStudentRest, error) {
-	url := fmt.Sprintf("%s/%s", s.Service.config.LadokRestAPIURL, studentUID)
+	url := fmt.Sprintf("%s/%s", s.Service.config.LadokRestURL, studentUID)
 	resp, err := s.httpClient.Get(url)
 	if err != nil {
 		return nil, err

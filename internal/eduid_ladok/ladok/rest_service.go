@@ -3,6 +3,7 @@ package ladok
 import (
 	"context"
 	"eduid_ladok/pkg/logger"
+	"net/http"
 
 	retryhttp "github.com/hashicorp/go-retryablehttp"
 )
@@ -15,7 +16,12 @@ type RestService struct {
 }
 
 // NewRestService creates a new instance of rest
-func NewRestService(ctx context.Context, service *Service, logger *logger.Logger) *RestService {
+func NewRestService(ctx context.Context, service *Service, logger *logger.Logger) (*RestService, error) {
+	tls, err := tlsConfig(service)
+	if err != nil {
+		return nil, err
+	}
+
 	s := &RestService{
 		logger:  logger,
 		Service: service,
@@ -23,10 +29,15 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 			RetryWaitMin: 1,
 			RetryWaitMax: 30,
 			RetryMax:     5,
+			HTTPClient: &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: tls,
+				},
+			},
 		},
 	}
 
-	return s
+	return s, nil
 }
 
 // Close closes serice ladok rest

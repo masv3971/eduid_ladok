@@ -16,7 +16,8 @@ import (
 
 // Config configure httpservice
 type Config struct {
-	Debug bool `envconfig:"DEBUG"`
+	Debug bool   `envconfig:"DEBUG"`
+	Host  string `envconfig:"HOST"`
 }
 
 // Service is the service object for httpserver
@@ -36,6 +37,7 @@ func New(config Config, internalAPI *internalapi.Client, publicAPI *publicapi.Cl
 		logger:      logger,
 		internalAPI: internalAPI,
 		publicAPI:   publicAPI,
+		server:      &http.Server{Addr: config.Host},
 	}
 
 	if s.config.Debug {

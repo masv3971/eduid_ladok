@@ -38,7 +38,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.C
 	return s
 }
 
-// Close closes ladok rest service
+// Close closes ladok atom service
 func (s *AtomService) Close(ctx context.Context) error {
 	s.logger.Warn("Quit")
 	defer func() {

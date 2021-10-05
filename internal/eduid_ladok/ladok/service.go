@@ -13,14 +13,14 @@ import (
 type Config struct {
 	// LadokURL is the specefic url to ladok instance
 	LadokAtomURL string `envconfig:"LADOK_ATOM_URL" required:"true" split_words:"true"`
-	// LadokAtomCertificatePath points to the certificates file on disk
-	LadokAtomCertificatePath string `required:"true" split_words:"true"`
-	// LadokAtomCertificatePassword password for certificates
-	LadokAtomCertificatePassword string `required:"true" split_words:"true"`
 	// LadokRestAPIURL is the url to ladok rest api
-	LadokRestAPIURL string `envconfig:"LADOK_REST_API_URL" required:"true" split_words:"true"`
+	LadokRestURL string `envconfig:"LADOK_REST_URL" required:"true" split_words:"true"`
 	// LadokAtomEndpoints is a list of endpoints to fetch
 	LadokAtomEndpoints []string `envconfig:"LADOK_ATOM_ENDPOINTS" required:"true"`
+	// LadokCertificatePath points to the certificates file on disk
+	LadokCertificatePath string `required:"true" split_words:"true" envconfig:"LADOK_CERTIFICATE_PATH"` // General
+	// LadokCertificatePassword password for certificates
+	LadokCertificatePassword string `required:"true" split_words:"true"` // Specefic
 }
 
 // Service holds service object for ladok
@@ -31,8 +31,9 @@ type Service struct {
 	eduid      *eduidiam.Service
 	schoolName string
 
-	Atom *AtomService
-	Rest *RestService
+	Atom       *AtomService
+	Rest       *RestService
+	Certifiate *CertificateService
 }
 
 // New creates a new instance of ladok Service object
@@ -44,9 +45,17 @@ func New(ctx context.Context, config Config, wg *sync.WaitGroup, schoolName stri
 		wg:         wg,
 	}
 
-	s.Rest = NewRestService(ctx, s, logger.New("rest"))
-	s.Atom = NewAtomService(ctx, s, channel, logger.New("atom"))
+	var err error
 
+	s.Certifiate, err = NewCertificateService(ctx, s, logger.New("certificate"))
+	if err != nil {
+		return nil, err
+	}
+	s.Rest, err = NewRestService(ctx, s, logger.New("rest"))
+	if err != nil {
+		return nil, err
+	}
+	s.Atom = NewAtomService(ctx, s, channel, logger.New("atom"))
 
 	return s, nil
 }
@@ -54,5 +63,6 @@ func New(ctx context.Context, config Config, wg *sync.WaitGroup, schoolName stri
 // Close closes ladok
 func (s *Service) Close(ctx context.Context) error {
 	s.Atom.Close(ctx)
+	s.Certifiate.Close(ctx)
 	return nil
 }

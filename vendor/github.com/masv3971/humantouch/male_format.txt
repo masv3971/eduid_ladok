@@ -1,0 +1,43 @@
+config := config{
+	Agedistrubtion{
+		Age0to10 {
+			Weigth: 100,
+			},
+		},
+	}
+
+person := humantouch.New(config)
+
+person.Female()
+
+person.Male()
+
+person.RandomHuman()
+
+person.Distrubution(config).Female()
+
+person.Distubution().Male()
+
+person.Distrubution().RandomHuman()
+
+
+[![Go Reference](https://pkg.go.dev/badge/pkg.go.dev/github.com/masv3971/humantouch.svg)](https://pkg.go.dev/pkg.go.dev/github.com/masv3971/humantouch)
+
+
+
+
+
+
+default sort: latest and open
+*filer function in javascript / search field
+| PORTS OPEN | IP | SUB NETWORK | SERVICE | LAST SCANNED |
+
+
+
+
+
+
+f042d-70b27
+66908-b0873
+ebf0d-548475
+ca69-d7935c2c21-6427ea85b6-010b03ff46-e6840c66fe-3bb0458971-c72871dea8-5738a39b1c-ad68042a89-2af39ecbe6-af71e0cc6b-8b5cb4e358-72ae2230ba-76748
