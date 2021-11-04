@@ -15,7 +15,7 @@ func TestMakeChannelEvents(t *testing.T) {
 	tts := []struct {
 		name string
 		have *MSG
-		want []*ChannelEvent
+		want []*LadokToAggregateMSG
 	}{
 		{
 			name: "OK",
@@ -82,47 +82,47 @@ func TestMakeChannelEvents(t *testing.T) {
 				},
 			},
 
-			want: []*ChannelEvent{
+			want: []*LadokToAggregateMSG{
 				{
 					Payload: &EventPayload{
 						StudentUID: "testStudentUID_1",
-						EntryUID:   "testID_1",
+						EntryID:   "testID_1",
 					},
 				},
 				{
 					Payload: &EventPayload{
 						StudentUID: "testStudentUID_2",
-						EntryUID:   "testID_2",
+						EntryID:   "testID_2",
 					},
 				},
 				{
 					Payload: &EventPayload{
 						StudentUID: "testStudentUID_3",
-						EntryUID:   "testID_3",
+						EntryID:   "testID_3",
 					},
 				},
 				{
 					Payload: &EventPayload{
 						StudentUID: "testStudentUID_4",
-						EntryUID:   "testID_4",
+						EntryID:   "testID_4",
 					},
 				},
 				{
 					Payload: &EventPayload{
 						StudentUID: "testStudentUID_5",
-						EntryUID:   "testID_5",
+						EntryID:   "testID_5",
 					},
 				},
 				{
 					Payload: &EventPayload{
 						StudentUID: "testStudentUID_6",
-						EntryUID:   "testID_6",
+						EntryID:   "testID_6",
 					},
 				},
 				{
 					Payload: &EventPayload{
 						StudentUID: "testStudentUID_7",
-						EntryUID:   "testID_7",
+						EntryID:   "testID_7",
 					},
 				},
 			},
@@ -145,12 +145,12 @@ func TestAddTimestamp(t *testing.T) {
 
 	tts := []struct {
 		name string
-		have ChannelEvent
+		have LadokToAggregateMSG
 		want []*EventTimestamp
 	}{
 		{
 			name: "OK",
-			have: ChannelEvent{},
+			have: LadokToAggregateMSG{},
 			want: []*EventTimestamp{
 				{
 					Title:     "testTitle_1",

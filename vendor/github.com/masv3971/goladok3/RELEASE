@@ -1,0 +1,20 @@
+v0.0.18 : bump tag
+v0.0.19 : test
+v0.0.20 : Add License to httpclient
+v0.0.21 : Add better testing and slicker http call function.
+v0.0.22 : Add more testing.
+v0.0.23 : Add entryID to superEvent struct.
+v0.0.24 : Add constants for event type.
+v0.0.25 : Add rate limit.
+v0.0.26 : Change type because of key/value store typeset.
+v0.0.27 : Add testinfra package.
+v0.0.28 : Test to passing by variables.
+v0.0.29 : Move all testing payloads to child package.
+v0.0.30 : Exposed content type variables.
+v0.0.31 : Add UIDs for testing purpose.
+v0.0.32 : Add test entry IDs.
+v0.0.33 : Add xml to format in feed.
+v0.0.34 : Add content-type for atom feed.
+v0.0.35 : Add error message to do method.
+v0.0.36 : Fix url to feed.
+v0.0.37 : Bump-tag

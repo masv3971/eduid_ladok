@@ -1,6 +1,13 @@
 # eduid_ladok
 Integration between eduid and ladok
 
+## Prerequisites
+1. Create account in schools local IDP
+2. Ask Ladok to create a certificate for the above user
+    * The certificate needs to have at least the following permissions:
+    * 
+
+
 ## Build
 ```
 # Linux
