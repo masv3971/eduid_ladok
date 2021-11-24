@@ -11,7 +11,7 @@ import (
 type RestService struct {
 	Service *Service
 	logger  *logger.Logger
-	ladok   *goladok3.Client
+	Ladok   *goladok3.Client
 }
 
 // NewRestService creates a new instance of rest
@@ -22,11 +22,12 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 	}
 
 	var err error
-	s.ladok, err = goladok3.New(goladok3.Config{
-		Password: s.Service.config.LadokCertificatePassword,
-		//Format:       "json",
-		URL:    s.Service.config.LadokURL,
-		Pkcs12: s.Service.Certificate.Pkcs12,
+	s.Ladok, err = goladok3.New(goladok3.Config{
+		URL:            s.Service.config.LadokURL,
+		Certificate:    s.Service.Certificate.Cert,
+		CertificatePEM: s.Service.Certificate.CertPEM,
+		PrivateKey:     s.Service.Certificate.PrivateKey,
+		PrivateKeyPEM:  s.Service.Certificate.PrivateKeyPEM,
 	})
 	if err != nil {
 		return nil, err

@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"eduid_ladok/internal/aggregate"
+	"eduid_ladok/internal/apiv1"
 	"eduid_ladok/internal/httpserver"
-	"eduid_ladok/internal/internalapi"
 	"eduid_ladok/internal/ladok"
-	"eduid_ladok/internal/publicapi"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
 	"os"
@@ -43,8 +42,10 @@ func main() {
 		panic(err)
 	}
 
+	ladoks := make(map[string]*ladok.Service)
+
 	for _, schoolName := range mainConfig.SchoolNames {
-		ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 200)
+		ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 1000)
 
 		s := make(map[string]service)
 
@@ -58,6 +59,7 @@ func main() {
 		}
 
 		ladok, err := ladok.New(ctx, ladokCfg, wg, schoolName, ladokToAggregateChan, log.New(schoolName).New("ladok"))
+		ladoks[schoolName] = ladok
 		s["ladok"] = ladok
 		if err != nil {
 			panic(err)
@@ -77,24 +79,16 @@ func main() {
 	if err := envconfig.Process("", &httpserverCfg); err != nil {
 		panic(err)
 	}
-	var internalAPICfg internalapi.Config
-	if err := envconfig.Process("", &internalAPICfg); err != nil {
-		panic(err)
-	}
-	var publicAPICfg publicapi.Config
-	if err := envconfig.Process("", &publicAPICfg); err != nil {
+	var apiv1Cfg apiv1.Config
+	if err := envconfig.Process("", &apiv1Cfg); err != nil {
 		panic(err)
 	}
 
-	internalAPI, err := internalapi.New(internalAPICfg, log.New("internalAPI"))
+	apiv1, err := apiv1.New(apiv1Cfg, ladoks, mainConfig.SchoolNames, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
-	publicAPI, err := publicapi.New(publicAPICfg, log.New("publicAPI"))
-	if err != nil {
-		panic(err)
-	}
-	httpserver, err := httpserver.New(httpserverCfg, internalAPI, publicAPI, log.New("httpserver"))
+	httpserver, err := httpserver.New(httpserverCfg, apiv1, log.New("httpserver"))
 	s["httpserver"] = httpserver
 	if err != nil {
 		panic(err)
@@ -120,5 +114,5 @@ func main() {
 
 	wg.Wait() // Block here until are workers are done
 
-	mainLog.Info("Stoped")
+	mainLog.Info("Stopped")
 }

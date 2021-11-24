@@ -3,14 +3,15 @@ package goladok3
 import (
 	"context"
 	"fmt"
-	"strings"
+
+	"github.com/masv3971/goladok3/ladoktypes"
 )
 
 // IsLadokPermissionsSufficient compare ladok permissions with ps
 func (c *Client) IsLadokPermissionsSufficient(ctx context.Context, myPermissions Permissions) (bool, error) {
 	var (
 		e             = &Errors{}
-		internalError = []InternalError{}
+		internalError = []ladoktypes.InternalError{}
 	)
 
 	egna, _, err := c.Kataloginformation.GetAnvandarbehorighetEgna(ctx)
@@ -22,7 +23,7 @@ func (c *Client) IsLadokPermissionsSufficient(ctx context.Context, myPermissions
 		return false, ErrNotSufficientPermissions
 	}
 
-	ladokProfile, _, err := c.Kataloginformation.GetBehorighetsprofil(ctx, &GetBehorighetsprofilerCfg{UID: egna.UID})
+	ladokProfile, _, err := c.Kataloginformation.GetBehorighetsprofil(ctx, &GetBehorighetsprofilerReq{UID: egna.UID})
 	if err != nil {
 		return false, err
 	}
@@ -46,7 +47,7 @@ func (c *Client) IsLadokPermissionsSufficient(ctx context.Context, myPermissions
 		}
 		if notFound {
 			//missingPermission[myPermissionsID] = myPermissionsValue
-			internalError = append(internalError, InternalError{
+			internalError = append(internalError, ladoktypes.InternalError{
 				Msg:  fmt.Sprintf("Missing id: %d, value: %q", myPermissionsID, myPermissionsValue),
 				Type: "Permission",
 			})
@@ -62,18 +63,13 @@ func (c *Client) IsLadokPermissionsSufficient(ctx context.Context, myPermissions
 
 func (c *Client) environment() (string, error) {
 	switch c.certificate.Subject.OrganizationalUnit[1] {
-	case envIntTestAPI:
-		return envIntTestAPI, nil
-	case envProdAPI:
-		return envProdAPI, nil
-	case envTestAPI:
-		return envTestAPI, nil
+	case ladoktypes.EnvIntTestAPI:
+		return ladoktypes.EnvIntTestAPI, nil
+	case ladoktypes.EnvProdAPI:
+		return ladoktypes.EnvProdAPI, nil
+	case ladoktypes.EnvTestAPI:
+		return ladoktypes.EnvTestAPI, nil
 	default:
 		return "", ErrNoEnvFound
 	}
-}
-
-// trim remove "urn"
-func (id FeedID) trim() string {
-	return strings.Split(string(id), ":")[2]
 }

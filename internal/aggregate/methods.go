@@ -5,13 +5,44 @@ import (
 	"eduid_ladok/pkg/model"
 
 	"github.com/masv3971/goladok3"
+	"github.com/masv3971/goladok3/ladoktypes"
 )
 
 func (s *Service) run(ctx context.Context) {
 	s.logger.Info("start run")
 	for {
 		select {
-		//case entry := <-s.ladok.Atom.Channel:
+		case msg := <-s.ladok.Atom.Channel:
+			s.logger.Info("received message", msg.Event.EntryID, msg.Event.EventTypeName)
+
+			reply, _, err := s.ladok.Rest.Ladok.Studentinformation.GetAktivPaLarosate(ctx, &goladok3.GetAktivPaLarosateReq{
+				UID: msg.Event.StudentUID,
+			})
+			if err != nil {
+				s.logger.Warn(err.Error())
+			}
+			for _, r := range reply.Studentkopplingar {
+				if r.LarosateID == s.ladok.SchoolID {
+					s.logger.Info("Student", r.StudentUID, "is active!")
+				}
+			}
+			//userReply, _, err := s.eduidiam.Users.Search(ctx, &goeduidiam.SearchUsersRequest{
+			//	Data: goeduidiam.SearchRequest{
+			//		Schemas:    []string{"urn:ietf:params:scim:api:messages:2.0:SearchRequest"},
+			//		Filter:     "",
+			//		StartIndex: 0,
+			//		Count:      0,
+			//		Attributes: []string{},
+			//	},
+			//})
+			if err != nil {
+				s.logger.Warn(err.Error())
+			}
+			//s.logger.Info("Aktiv pa larosate", reply)
+
+			//s.
+
+			//return
 		//entry.AddTimestamp("aggregate arrived")
 		//s.whatToDo(entry)
 		//s.logger.Info("Process event", entry.Payload.EntryID, entry.Payload.EventType)
@@ -22,7 +53,7 @@ func (s *Service) run(ctx context.Context) {
 
 func (s *Service) whatToDo(entry *model.LadokToAggregateMSG) {
 	switch entry.Event.EventTypeName {
-	case goladok3.LokalStudentEventName:
-	case goladok3.AnvandareAndradEventName:
+	case ladoktypes.LokalStudentEventName:
+	default:
 	}
 }

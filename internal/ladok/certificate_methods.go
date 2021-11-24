@@ -2,7 +2,6 @@ package ladok
 
 import (
 	"context"
-	"crypto/rsa"
 	"crypto/x509"
 	"eduid_ladok/pkg/model"
 	"encoding/pem"
@@ -13,46 +12,50 @@ import (
 	"time"
 
 	"go.step.sm/crypto/x509util"
-	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
-// UnwrapBundle unwraps pfx or p12 certificate bundle into client cert, cert chain and private key
-func (s *CertificateService) UnwrapBundle() error {
-	certPath := filepath.Join(s.Service.config.LadokCertificateFolder, fmt.Sprintf("%s.%s", s.Service.schoolName, "pfx"))
+// importCertificate read crt, key and pem file and put it the certificate handler.
+func (s *CertificateService) importCertificate() error {
+	var (
+		certPath = filepath.Join(s.Service.config.LadokCertificateFolder, fmt.Sprintf("%s.%s", s.Service.schoolName, "crt"))
+		keyPath  = filepath.Join(s.Service.config.LadokCertificateFolder, fmt.Sprintf("%s.%s", s.Service.schoolName, "key"))
+	)
 
-	if _, err := os.Stat(certPath); err == nil {
-		certFile, err := ioutil.ReadFile(certPath)
-		if err != nil {
+	for _, file := range []string{certPath, keyPath} {
+		if _, err := os.Stat(file); err != nil {
 			return err
 		}
-		privateKey, clientCert, chainCerts, err := pkcs12.DecodeChain(certFile, s.Service.config.LadokCertificatePassword)
-		if err != nil {
-			s.logger.Warn("pkcs12 decoding", err.Error())
-			return err
-		}
-		if s.isCertificateInvalid(clientCert) {
-			return model.ErrCertificateNotValid
-		}
+	}
 
-		s.Chain = x509.NewCertPool()
-		for _, chainCert := range chainCerts {
-			s.Chain.AddCert(chainCert)
-		}
+	certFile, err := ioutil.ReadFile(certPath)
+	if err != nil {
+		return err
+	}
 
-		certPem := &pem.Block{
-			Type:  "CERTIFICATE",
-			Bytes: clientCert.Raw,
-		}
-		keyPEM := &pem.Block{
-			Type:  "RSA PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(privateKey.(*rsa.PrivateKey)),
-		}
+	s.CertPEM = certFile
 
-		s.CRT = clientCert
-		s.PrivateKey = privateKey.(*rsa.PrivateKey)
-		s.CRTPEM = pem.EncodeToMemory(certPem)
-		s.PrivateKeyPEM = pem.EncodeToMemory(keyPEM)
-		s.Pkcs12 = certFile
+	pemBlock, _ := pem.Decode(certFile)
+
+	s.Cert, err = x509.ParseCertificate(pemBlock.Bytes)
+	if err != nil {
+		return err
+	}
+
+	keyFile, err := ioutil.ReadFile(keyPath)
+	if err != nil {
+		return err
+	}
+	s.PrivateKeyPEM = keyFile
+
+	keyBlock, _ := pem.Decode(keyFile)
+	s.PrivateKey, err = x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
+	if err != nil {
+		fmt.Println("parse privatekey")
+		return err
+	}
+
+	if s.isCertificateInvalid() {
+		return model.ErrCertificateNotValid
 	}
 
 	return nil
@@ -68,21 +71,21 @@ var (
 // CheckValidTime keeps track of time left on certificate, return status
 func (s *CertificateService) CheckValidTime() (string, time.Time) {
 	days90 := time.Now().AddDate(0, 0, 90)
-	if s.CRT.NotAfter.Before(days90) {
-		return Cert90DaysWarning, s.CRT.NotAfter
+	if s.Cert.NotAfter.Before(days90) {
+		return Cert90DaysWarning, s.Cert.NotAfter
 	}
 
-	return CertOK, s.CRT.NotAfter
+	return CertOK, s.Cert.NotAfter
 }
 
 // NewSHA256Fingerprint return fingerprint from a *x509.Certificate certificate
-func (s *CertificateService) NewSHA256Fingerprint() string { return x509util.Fingerprint(s.CRT) }
+func (s *CertificateService) NewSHA256Fingerprint() string { return x509util.Fingerprint(s.Cert) }
 
-func (s *CertificateService) isCertificateInvalid(cert *x509.Certificate) bool {
-	NAfterA := time.Now().After(cert.NotAfter)
-	NBeforeB := time.Now().Before(cert.NotBefore)
-	BAfterA := cert.NotBefore.After(cert.NotAfter)
-	ABeforeB := cert.NotAfter.Before(cert.NotBefore)
+func (s *CertificateService) isCertificateInvalid() bool {
+	NAfterA := time.Now().After(s.Cert.NotAfter)
+	NBeforeB := time.Now().Before(s.Cert.NotBefore)
+	BAfterA := s.Cert.NotBefore.After(s.Cert.NotAfter)
+	ABeforeB := s.Cert.NotAfter.Before(s.Cert.NotBefore)
 
 	if NAfterA || NBeforeB || BAfterA || ABeforeB {
 		return true

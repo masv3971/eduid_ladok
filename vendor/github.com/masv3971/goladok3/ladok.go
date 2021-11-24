@@ -8,38 +8,37 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"encoding/pem"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/masv3971/goladok3/ladoktypes"
 	"golang.org/x/time/rate"
-
-	"software.sslmate.com/src/go-pkcs12"
 )
 
 // Config configures new function
 type Config struct {
-	Password string
-	//Format       string
-	URL    string
-	Pkcs12 []byte
+	URL            string            `validate:"required"`
+	Certificate    *x509.Certificate `validate:"required"`
+	CertificatePEM []byte            `validate:"required"`
+	PrivateKey     *rsa.PrivateKey   `validate:"required"`
+	PrivateKeyPEM  []byte            `validate:"required"`
+	//Chain         []*x509.Certificate `validate:"required"`
 }
 
 // Client holds the ladok object
 type Client struct {
+	//password       string
 	HTTPClient     *http.Client
 	rateLimit      *rate.Limiter
 	format         string
 	url            string
-	password       string
-	pkcs12         []byte
 	certificate    *x509.Certificate
-	chain          *x509.CertPool
 	certificatePEM []byte
+	chain          *x509.CertPool
+	chainPEM       []byte
 	privateKey     *rsa.PrivateKey
 	privateKeyPEM  []byte
 
@@ -51,17 +50,19 @@ type Client struct {
 
 // New create a new instanace of ladok
 func New(config Config) (*Client, error) {
-	c := &Client{
-		password:  config.Password,
-		format:    "json",
-		url:       config.URL,
-		pkcs12:    config.Pkcs12,
-		rateLimit: rate.NewLimiter(rate.Every(1*time.Second), 30),
-	}
-
-	if err := c.unwrapPkcs12(); err != nil {
+	if err := Check(config); err != nil {
 		return nil, err
 	}
+	c := &Client{
+		format:         "json",
+		url:            config.URL,
+		privateKeyPEM:  config.PrivateKeyPEM,
+		certificatePEM: config.CertificatePEM,
+		certificate:    config.Certificate,
+		privateKey:     config.PrivateKey,
+		rateLimit:      rate.NewLimiter(rate.Every(1*time.Second), 30),
+	}
+
 	if err := c.httpConfigure(); err != nil {
 		return nil, err
 	}
@@ -74,34 +75,6 @@ func New(config Config) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) unwrapPkcs12() error {
-	privateKey, clientCert, chainCerts, err := pkcs12.DecodeChain(c.pkcs12, c.password)
-	if err != nil {
-		return err
-	}
-
-	certPem := &pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: clientCert.Raw,
-	}
-	keyPEM := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(privateKey.(*rsa.PrivateKey)),
-	}
-
-	c.certificate = clientCert
-	c.privateKey = privateKey.(*rsa.PrivateKey)
-	c.certificatePEM = pem.EncodeToMemory(certPem)
-	c.privateKeyPEM = pem.EncodeToMemory(keyPEM)
-
-	c.chain = x509.NewCertPool()
-	for _, chainCert := range chainCerts {
-		c.chain.AddCert(chainCert)
-	}
-
-	return nil
-}
-
 func (c *Client) httpConfigure() error {
 	keyPair, err := tls.X509KeyPair(c.certificatePEM, c.privateKeyPEM)
 	if err != nil {
@@ -109,11 +82,11 @@ func (c *Client) httpConfigure() error {
 	}
 
 	tlsCfg := &tls.Config{
-		Rand:               rand.Reader,
-		Certificates:       []tls.Certificate{keyPair},
-		NextProtos:         []string{},
-		ClientAuth:         tls.RequireAndVerifyClientCert,
-		ClientCAs:          c.chain,
+		Rand:         rand.Reader,
+		Certificates: []tls.Certificate{keyPair},
+		NextProtos:   []string{},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		//ClientCAs:          c.chainDER,
 		InsecureSkipVerify: false,
 		CipherSuites: []uint16{
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
@@ -221,22 +194,20 @@ func (c *Client) do(req *http.Request, value interface{}) (*http.Response, error
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, oneError("cant perform http.client.do", "HTTPClient.Do", "do", err.Error())
+		return nil, oneError("Can't perform http.client.do", "HTTPClient.Do", "do", err.Error())
 	}
 	defer resp.Body.Close()
 
 	if err := checkResponse(resp); err != nil {
 		buf := &bytes.Buffer{}
 		if _, err := buf.ReadFrom(resp.Body); err != nil {
-			return nil, oneError("Cant process buffer", "buf.ReadFrom", "do", err.Error())
+			return nil, oneError("Can't process buffer", "buf.ReadFrom", "do", err.Error())
 		}
-		ladokError := &LadokError{}
-		e := &Errors{}
+		ladokError := &ladoktypes.LadokError{}
 		if err := json.Unmarshal(buf.Bytes(), ladokError); err != nil { // TODO(masv): Fix xml error parsing into Errors.
-			return nil, oneError("Cant unmarshal json to  Errors ", "json.Unmarshal", "do", err.Error())
+			return nil, oneError("Can't unmarshal json to Errors ", "json.Unmarshal", "do", err.Error())
 		}
-		e.Ladok = ladokError
-		return nil, e
+		return nil, &Errors{Ladok: ladokError}
 	}
 
 	switch resp.Header.Get("Content-Type") {
@@ -265,12 +236,12 @@ func checkResponse(r *http.Response) error {
 	return oneError("Invalid request", "statusCode", "checkResponse", "")
 }
 
-func (c *Client) call(ctx context.Context, acceptHeader, method, path, param string, req, reply interface{}) (*http.Response, error) {
+func (c *Client) call(ctx context.Context, acceptHeader, method, url string, req, reply interface{}) (*http.Response, error) {
 	request, err := c.newRequest(
 		ctx,
 		acceptHeader,
 		method,
-		fmt.Sprintf("/%s/%s", path, param),
+		url,
 		req,
 	)
 	if err != nil {

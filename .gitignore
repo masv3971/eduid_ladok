@@ -1,4 +1,8 @@
-cert
+/cert/*
+!/cert/Ladok3.Chain.CA.pem
+
 environment_vars.sh
 notes.txt
-/bin
+bin
+docker-compose.yaml
+Dockerfile

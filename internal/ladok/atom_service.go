@@ -13,7 +13,6 @@ import (
 // AtomService holds the service object
 type AtomService struct {
 	Service *Service
-	//db      *cache.Cache
 	logger  *logger.Logger
 	Channel chan *model.LadokToAggregateMSG
 	ladok   *goladok3.Client
@@ -33,9 +32,11 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 
 	var err error
 	s.ladok, err = goladok3.New(goladok3.Config{
-		Password: s.Service.config.LadokCertificatePassword,
-		URL:      s.Service.config.LadokURL,
-		Pkcs12:   s.Service.Certificate.Pkcs12,
+		URL:            s.Service.config.LadokURL,
+		Certificate:    s.Service.Certificate.Cert,
+		CertificatePEM: s.Service.Certificate.CertPEM,
+		PrivateKey:     s.Service.Certificate.PrivateKey,
+		PrivateKeyPEM:  s.Service.Certificate.PrivateKeyPEM,
 	})
 	if err != nil {
 		return nil, err

@@ -13,13 +13,13 @@ import (
 type CertificateService struct {
 	Service           *Service
 	logger            *logger.Logger
-	CRT               *x509.Certificate
-	CRTPEM            []byte
+	Cert              *x509.Certificate
+	CertPEM           []byte
 	PrivateKey        *rsa.PrivateKey
 	PrivateKeyPEM     []byte
 	ChainPEM          []byte
 	SHA256Fingerprint string
-	Chain             *x509.CertPool
+	Chain             []*x509.Certificate
 	Pkcs12            []byte
 }
 
@@ -29,7 +29,7 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 		logger:  logger,
 		Service: service,
 	}
-	if err := s.UnwrapBundle(); err != nil {
+	if err := s.importCertificate(); err != nil {
 		return nil, err
 	}
 

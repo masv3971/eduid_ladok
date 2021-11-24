@@ -9,7 +9,8 @@ import (
 )
 
 func TestNewCertificateService(t *testing.T) {
-	service, _ := mockService(t, 200)
+	tempDir := t.TempDir()
+	service, _, _ := mockService(t, 200, tempDir)
 
 	type have struct {
 		notAfter, notBefore int
@@ -72,7 +73,7 @@ func TestNewCertificateService(t *testing.T) {
 			//	return
 			//}
 
-			assert.NotEmpty(t, service.Certificate.CRT.NotAfter, "should not be empty")
+			assert.NotEmpty(t, service.Certificate.Cert.NotAfter, "should not be empty")
 
 			//assert.Equal(t, x509util.Fingerprint(cs.CRT), cs.SHA256Fingerprint)
 		})

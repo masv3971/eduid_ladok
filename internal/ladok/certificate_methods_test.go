@@ -1,148 +1,40 @@
 package ladok
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"crypto/x509/pkix"
-	"eduid_ladok/pkg/logger"
-	"encoding/asn1"
-	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
-	"time"
 
+	"github.com/masv3971/goladok3/ladokmocks"
+	"github.com/masv3971/goladok3/ladoktypes"
 	"github.com/stretchr/testify/assert"
-	"software.sslmate.com/src/go-pkcs12"
 )
 
-func mockNewCertificateService(t *testing.T) *CertificateService {
-	service := &Service{
-		config: Config{
-			LadokURL:                 "",
-			LadokCertificateFolder:   t.TempDir(),
-			LadokCertificatePassword: "testPassword",
-		},
-		wg:         &sync.WaitGroup{},
-		logger:     &logger.Logger{},
-		schoolName: "testSchoolName",
-		Atom:       &AtomService{},
-		Rest:       &RestService{},
-		Certificate: &CertificateService{
-			Service:    &Service{},
-			logger:     &logger.Logger{},
-			CRT:        &x509.Certificate{},
-			PrivateKey: &rsa.PrivateKey{},
-		},
-	}
-	certService := &CertificateService{
-		Service:    service,
-		logger:     &logger.Logger{},
-		CRT:        &x509.Certificate{},
-		PrivateKey: &rsa.PrivateKey{},
+func mockCertificate(t *testing.T, notBefore, notAfter int, folder string) {
+	certPEM, _, privateKeyPEM, _ := ladokmocks.MockCertificateAndKey(t, ladoktypes.EnvIntTestAPI, 0, 100)
+	//fmt.Println("cert", cert, "privateKey", privateKey, "chain", chain[0])
+
+	cryptoParts := map[string][]byte{
+		"crt": certPEM,
+		"key": privateKeyPEM,
+		//"pem": chainData,
 	}
 
-	return certService
-}
-
-func mockNewLadokService(t *testing.T) *Service {
-	service := &Service{
-		config: Config{
-			LadokURL:                 "",
-			LadokCertificateFolder:   t.TempDir(),
-			LadokCertificatePassword: "testPassword",
-		},
-		wg:          &sync.WaitGroup{},
-		logger:      &logger.Logger{},
-		schoolName:  "testSchoolName",
-		Atom:        &AtomService{},
-		Rest:        &RestService{},
-		Certificate: &CertificateService{},
-	}
-
-	return service
-}
-
-func mockCertificateTemplate(t *testing.T, notBefore, notAfter int) *x509.Certificate {
-	certTemplate := &x509.Certificate{
-		SignatureAlgorithm: x509.SHA256WithRSA,
-		PublicKeyAlgorithm: x509.RSA,
-		Version:            3,
-		SerialNumber:       big.NewInt(2300),
-		Issuer: pkix.Name{
-			Country:            []string{},
-			Organization:       []string{},
-			OrganizationalUnit: []string{},
-			Locality:           []string{},
-			Province:           []string{},
-			StreetAddress:      []string{},
-			PostalCode:         []string{},
-			SerialNumber:       "",
-			CommonName:         "Ladok3 LED MIT API CA",
-			Names:              []pkix.AttributeTypeAndValue{},
-			ExtraNames:         []pkix.AttributeTypeAndValue{},
-		},
-		Subject: pkix.Name{
-			Country:            []string{"SE"},
-			Organization:       []string{"Ladok"},
-			OrganizationalUnit: []string{"LED", "Int-test-API"},
-			Locality:           []string{"Stockholm"},
-			Province:           []string{},
-			StreetAddress:      []string{},
-			PostalCode:         []string{},
-			SerialNumber:       "",
-			CommonName:         "sunet@KF",
-			Names:              []pkix.AttributeTypeAndValue{},
-			ExtraNames:         []pkix.AttributeTypeAndValue{},
-		},
-		NotBefore:                   time.Now().AddDate(0, 0, notBefore),
-		NotAfter:                    time.Now().AddDate(0, 0, notAfter),
-		KeyUsage:                    x509.KeyUsageDataEncipherment | x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		Extensions:                  []pkix.Extension{},
-		ExtraExtensions:             []pkix.Extension{},
-		UnhandledCriticalExtensions: []asn1.ObjectIdentifier{},
-		ExtKeyUsage:                 []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		OCSPServer:                  []string{"URI:http://ca01.rome08.led.ladok.se:8080/ca/ocsp"},
-	}
-
-	return certTemplate
-}
-
-func mockNewCertificateBundle(t *testing.T, notBefore, notAfter int, folder, fileType, password string) {
-	certTemplate := mockCertificateTemplate(t, notBefore, notAfter)
-
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	certByte, err := x509.CreateCertificate(rand.Reader, certTemplate, certTemplate, &privateKey.PublicKey, privateKey)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cert, err := x509.ParseCertificate(certByte)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	data, err := pkcs12.Encode(rand.Reader, privateKey, cert, []*x509.Certificate{}, password)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	certPath := filepath.Join(folder, fmt.Sprintf("%s.%s", "testSchoolName", fileType))
-
-	if err := os.WriteFile(certPath, data, 0777); err != nil {
-		t.Fatal(err)
+	for ext, data := range cryptoParts {
+		if err := os.WriteFile(
+			filepath.Join(folder, fmt.Sprintf("%s.%s", "testSchoolName", ext)),
+			data,
+			0777,
+		); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
-func TestUnwrapBundle(t *testing.T) {
+func TestImportCertificate(t *testing.T) {
+	tempDir := t.TempDir()
+	service, _, _ := mockService(t, 200, tempDir)
 	type have struct {
 		notBefore, notAfter int
 		fileType            string
@@ -153,38 +45,22 @@ func TestUnwrapBundle(t *testing.T) {
 		want error
 	}{
 		{
-			name: "OK p12",
-			have: have{
-				notBefore: 0,
-				notAfter:  100,
-				fileType:  "p12",
-			},
-			want: errors.New(""),
-		},
-		{
-			name: "OK pfx",
-			have: have{
-				notBefore: 0,
-				notAfter:  100,
-				fileType:  "pfx",
-			},
-			want: errors.New(""),
+			name: "",
+			have: have{},
+			want: nil,
 		},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			service, _ := mockService(t, 200)
-
-			if err := service.Certificate.UnwrapBundle(); err != nil {
+			if err := service.Certificate.importCertificate(); err != nil {
 				assert.EqualError(t, err, tt.want.Error())
 			}
 
-			assert.NotNil(t, service.Certificate.CRT, "client cert should not be nil")
-			assert.NotNil(t, service.Certificate.PrivateKey, "privatekey should not be nil")
-			assert.NotEmpty(t, service.Certificate.CRTPEM)
-			assert.NotEmpty(t, service.Certificate.PrivateKeyPEM)
-			assert.NotEmpty(t, service.Certificate.CRT.NotAfter, "should not be empty")
+			assert.NotNil(t, service.Certificate.Cert)
+			assert.NotNil(t, service.Certificate.Chain)
+			assert.NotNil(t, service.Certificate.PrivateKey)
+
 		})
 	}
 }
@@ -218,11 +94,9 @@ func TestCheckValidTime(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := mockNewCertificateService(t)
+			service, _, _ := mockService(t, 200, t.TempDir())
 
-			cs.CRT = mockCertificateTemplate(t, tt.have.notBefore, tt.have.notAfter)
-
-			gotStatus, _ := cs.CheckValidTime()
+			gotStatus, _ := service.Certificate.CheckValidTime()
 
 			t.Logf("name: %q", tt.name)
 			assert.Equal(t, tt.want, gotStatus, "status should be equal")
@@ -275,10 +149,8 @@ func TestIsCertificateInvalid(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := mockNewCertificateService(t)
-			cert := mockCertificateTemplate(t, tt.have.notBefore, tt.have.notAfter)
-
-			got := cs.isCertificateInvalid(cert)
+			service, _, _ := mockService(t, 200, t.TempDir())
+			got := service.Certificate.isCertificateInvalid()
 
 			assert.Equal(t, tt.want, got)
 		})

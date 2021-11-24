@@ -1,0 +1,9 @@
+v0.0.1 : Init commit
+v0.0.2 : Add public module path.
+v0.0.3 : Add tests for handles.
+v0.0.4 : Improve README with a nice example.
+v0.0.5 : Fix small typo.
+v0.0.6 : Refactor tests and handlers.
+v0.0.7 : Update readme with latest changes.
+v0.0.8 : Add jwt support and stream lined handlers test.
+v0.0.9 : Bump tag.

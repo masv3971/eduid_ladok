@@ -1,12 +1,11 @@
 package httpserver
 
-import "eduid_ladok/internal/publicapi"
+import (
+	"eduid_ladok/internal/apiv1"
+)
 
-// InternalAPI interface
-type InternalAPI interface {
-}
-
-// PublicAPI interface
-type PublicAPI interface {
-	Public(indata *publicapi.RequestPublic) (*publicapi.ReplyPublic, error)
+// Apiv1 interface
+type Apiv1 interface {
+	LadokInfo(indata *apiv1.RequestLadokInfo) (*apiv1.ReplyLadokInfo, error)
+	SchoolNames(indata *apiv1.RequestSchoolNames) (*apiv1.ReplySchoolNames, error)
 }

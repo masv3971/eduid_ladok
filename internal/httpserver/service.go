@@ -2,8 +2,7 @@ package httpserver
 
 import (
 	"context"
-	"eduid_ladok/internal/internalapi"
-	"eduid_ladok/internal/publicapi"
+	"eduid_ladok/internal/apiv1"
 	"eduid_ladok/pkg/helpers"
 	"eduid_ladok/pkg/logger"
 	"net/http"
@@ -22,22 +21,20 @@ type Config struct {
 
 // Service is the service object for httpserver
 type Service struct {
-	config      Config
-	logger      *logger.Logger
-	server      *http.Server
-	internalAPI InternalAPI
-	publicAPI   PublicAPI
-	gin         *gin.Engine
+	config Config
+	logger *logger.Logger
+	server *http.Server
+	apiv1  Apiv1
+	gin    *gin.Engine
 }
 
 // New creates a new httpserver service
-func New(config Config, internalAPI *internalapi.Client, publicAPI *publicapi.Client, logger *logger.Logger) (*Service, error) {
+func New(config Config, api *apiv1.Client, logger *logger.Logger) (*Service, error) {
 	s := &Service{
-		config:      config,
-		logger:      logger,
-		internalAPI: internalAPI,
-		publicAPI:   publicAPI,
-		server:      &http.Server{Addr: config.Host},
+		config: config,
+		logger: logger,
+		apiv1:  api,
+		server: &http.Server{Addr: config.Host},
 	}
 
 	if s.config.Debug {
@@ -66,7 +63,8 @@ func New(config Config, internalAPI *internalapi.Client, publicAPI *publicapi.Cl
 		c.JSON(500, gin.H{"error": "not a valid endpoint", "data": nil})
 	})
 
-	s.regEndpoint("api/public/v1", "GET", s.endpointPublic)
+	s.regEndpoint("api/v1/:schoolName/ladokinfo", "POST", s.endpointLadokInfo)
+	s.regEndpoint("api/v1/schoolnames", "GET", s.endpointSchoolNames)
 
 	// Run http server
 	go func() {
