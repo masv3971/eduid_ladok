@@ -25,9 +25,20 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		Channel: channel,
 		Service: service,
 		logger:  logger,
-		db: redis.NewClient(&redis.Options{
-			Addr: "localhost:6379",
-		}),
+	}
+
+	switch len(s.Service.config.RedisAddr) {
+	case 1:
+		s.db = redis.NewClient(&redis.Options{
+			Addr: s.Service.config.RedisAddr[0],
+			DB:   s.Service.config.RedisDB,
+		})
+	default:
+		s.db = redis.NewFailoverClient(&redis.FailoverOptions{
+			MasterName:    "",
+			SentinelAddrs: s.Service.config.RedisAddr,
+			DB:            service.config.RedisDB,
+		})
 	}
 
 	var err error

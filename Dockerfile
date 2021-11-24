@@ -1,26 +1,34 @@
 ## Compile
-FROM golang:1.17-stretch AS build
+FROM golang:1.17 AS builder
 
-WORKDIR /
+WORKDIR /go/src/app
 
-COPY internal ./
-COPY pkg ./ 
-COPY cmd ./
-COPY Makefile ./
-COPY go.mod ./
-COPY go.sum ./
-COPY VERSION ./
+COPY . .
 
-RUN go mod download
+RUN ls -l
+#RUN go mod download
 RUN make
 
 ## Deploy
-FROM gcr.io/distroless/base-debian10
+FROM alpine:3.14
 
 WORKDIR /
 
-COPY --from=build /bin/eduid_ladok-linux /eduid_ladok
+COPY --from=builder /go/src/app/bin/eduid_ladok /eduid_ladok
 
-USER nonroot:nonroot
+ENV LOGXI=* \
+    DEBUG=true \
+    HOST=":8080" \
+    SCHOOL_NAMES="kf,lnu" \
+    KF_SAML_NAME="student.konstfack.se" \
+    LNU_SAML_NAME="lnu.se" \
+    LADOK_URL="https://api.integrationstest.ladok.se" \
+    EDUID_IAM_URL="https://api.dev.eduid.se/scim/test" \
+    JWT_URL="https://auth-test.sunet.se" \
+    LADOK_CERTIFICATE_FOLDER="cert" \
+    REDIS_ADDR="redis:6379" \
+    REDIS_DB="3"
 
-ENTRYPOINT ["eduid_ladok"]
+COPY cert ./cert
+
+CMD [ "./eduid_ladok" ]

@@ -15,8 +15,10 @@ type Config struct {
 	LadokURL string `envconfig:"LADOK_URL" required:"true" split_words:"true"`
 	// LadokCertificateFolder points to the certificates file on disk
 	LadokCertificateFolder string `required:"true" split_words:"true" envconfig:"LADOK_CERTIFICATE_FOLDER"` // General
-	// LadokCertificatePassword password for certificates
-	LadokCertificatePassword string `required:"true" split_words:"true"` // Specific
+	// RedisAddr typical "localhost:6379", in docker redis:6379 or in sentinel "redis_1:6379,redis_2:6379"
+	RedisAddr []string `required:"true" split_words:"true" envconfig:"REDIS_ADDR"`
+	// RedisDB redis database number
+	RedisDB int `required:"true" split_words:"true" envconfig:"REDIS_DB"`
 }
 
 // Service holds service object for ladok

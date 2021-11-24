@@ -32,6 +32,7 @@ func main() {
 		log      *logger.Logger
 		mainLog  *logger.Logger
 		services = make(map[string]map[string]service)
+		ladoks   = make(map[string]*ladok.Service)
 	)
 
 	log = logger.New("eduid_ladok")
@@ -41,8 +42,6 @@ func main() {
 	if err := envconfig.Process("", &mainConfig); err != nil {
 		panic(err)
 	}
-
-	ladoks := make(map[string]*ladok.Service)
 
 	for _, schoolName := range mainConfig.SchoolNames {
 		ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 1000)

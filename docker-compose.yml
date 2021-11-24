@@ -3,12 +3,14 @@ version: "3.9"
 
 services:
   eduid_ladok:
+    container_name: "eduid_ladok"
     build:
       context: .
     image: eduid_ladok
     volumes:
       - eduid_ladok:/data
-    command: bin/eduid_ladok
+    depends_on:
+      - redis
     networks:
       eduid_ladok-net:
         ipv4_address: 172.16.20.2
