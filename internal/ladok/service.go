@@ -19,6 +19,8 @@ type Config struct {
 	RedisAddr []string `required:"true" split_words:"true" envconfig:"REDIS_ADDR"`
 	// RedisDB redis database number
 	RedisDB int `required:"true" split_words:"true" envconfig:"REDIS_DB"`
+	// LadokAtomPeriodicity amount of seconds between fetches
+	LadokAtomPeriodicity int `required:"true" split_words:"true" envconfig:"LADOK_ATOM_PERIODICITY"`
 }
 
 // Service holds service object for ladok

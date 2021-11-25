@@ -8,7 +8,10 @@ Integration between eduid and ladok
     * 
 
 
-## Build
+## Build and run in Docker-compose
+1. docker-compose build
+2. docker-compose up -d
+## Build outside Docker
 ```
 # Linux
 $ make

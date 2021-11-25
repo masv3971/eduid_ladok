@@ -53,7 +53,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		return nil, err
 	}
 
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(time.Duration(s.Service.config.LadokAtomPeriodicity) * time.Second)
 	go func() {
 		for {
 			select {
