@@ -30,6 +30,4 @@ ENV LOGXI=* \
     REDIS_ADDR="redis:6379" \
     REDIS_DB="3"
 
-COPY cert ./cert
-
 CMD [ "./eduid_ladok" ]

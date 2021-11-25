@@ -1,0 +1,5 @@
+triggers:
+  cron: "@weekly"
+slack:
+  room: "eduid-builds"
+docker_name: eduid/eduid_ladok
