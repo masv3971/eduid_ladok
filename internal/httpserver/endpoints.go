@@ -18,12 +18,12 @@ func (s *Service) endpointLadokInfo(c *gin.Context) (interface{}, error) {
 	return reply, nil
 }
 
-func (s *Service) endpointSchoolNames(c *gin.Context) (interface{}, error) {
-	request := &apiv1.RequestSchoolNames{}
+func (s *Service) endpointSchoolInfo(c *gin.Context) (interface{}, error) {
+	request := &apiv1.RequestSchoolInfo{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.SchoolNames(request)
+	reply, err := s.apiv1.SchoolInfo(request)
 	if err != nil {
 		return nil, err
 	}

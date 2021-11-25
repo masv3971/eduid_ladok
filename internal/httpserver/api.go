@@ -7,5 +7,5 @@ import (
 // Apiv1 interface
 type Apiv1 interface {
 	LadokInfo(indata *apiv1.RequestLadokInfo) (*apiv1.ReplyLadokInfo, error)
-	SchoolNames(indata *apiv1.RequestSchoolNames) (*apiv1.ReplySchoolNames, error)
+	SchoolInfo(indata *apiv1.RequestSchoolInfo) (*apiv1.ReplySchoolInfo, error)
 }

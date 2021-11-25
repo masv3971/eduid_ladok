@@ -64,7 +64,7 @@ func New(config Config, api *apiv1.Client, logger *logger.Logger) (*Service, err
 	})
 
 	s.regEndpoint("api/v1/:schoolName/ladokinfo", "POST", s.endpointLadokInfo)
-	s.regEndpoint("api/v1/schoolnames", "GET", s.endpointSchoolNames)
+	s.regEndpoint("api/v1/schoolinfo", "GET", s.endpointSchoolInfo)
 
 	// Run http server
 	go func() {
