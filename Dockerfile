@@ -5,8 +5,6 @@ WORKDIR /go/src/app
 
 COPY . .
 
-RUN ls -l
-#RUN go mod download
 RUN make
 
 ## Deploy

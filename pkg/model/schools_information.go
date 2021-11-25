@@ -3,156 +3,156 @@ package model
 // Schools consists of all ladok access schools
 var Schools = map[string]SchoolInfo{
 	"bth": {
-		LongNameSv: "blekinge tekniska högskola",
-		LongNameEn: "",
+		LongNameSv: "Blekinge tekniska högskola",
+		LongNameEn: "Blekinge Institute of Technology",
 	},
 	"cth": {
 		LongNameSv: "Chalmers tekniska högskola",
-		LongNameEn: "",
+		LongNameEn: "Chalmers University of Technology",
 	},
 	"ehs": {
 		LongNameSv: "Enskilda Högskolan Stockholm",
-		LongNameEn: "",
+		LongNameEn: "University College Stockholm",
 	},
 	"esh": {
 		LongNameSv: "Ersta Sköndal Bräcke högskola",
-		LongNameEn: "",
+		LongNameEn: "Ersta Sköndal Bräcke University College",
 	},
 	"fhs": {
 		LongNameSv: "Försvarshögskolan",
-		LongNameEn: "",
+		LongNameEn: "Swedish Defence University",
 	},
 	"ghi": {
 		LongNameSv: "Gymnastik- och idrottshögskolan",
-		LongNameEn: "",
+		LongNameEn: "Swedish School of Sport and Health Sciences",
 	},
 	"gu": {
 		LongNameSv: "Göteborgs universitet",
-		LongNameEn: "",
+		LongNameEn: "University of Gothenburg",
 	},
 	"hda": {
 		LongNameSv: "Högskolan Dalarna",
-		LongNameEn: "",
+		LongNameEn: "Dalarna University",
 	},
 	"hb": {
 		LongNameSv: "Högskolan i Borås",
-		LongNameEn: "",
+		LongNameEn: "University of Borås",
 	},
 	"hig": {
 		LongNameSv: "Högskolan i Gävle",
-		LongNameEn: "",
+		LongNameEn: "University of Gävle",
 	},
 	"hh": {
 		LongNameSv: "Högskolan i Halmstad",
-		LongNameEn: "",
+		LongNameEn: "Halmstad University",
 	},
 	"hs": {
 		LongNameSv: "Högskolan i Skövde",
-		LongNameEn: "",
+		LongNameEn: "University of Skövde",
 	},
 	"hkr": {
 		LongNameSv: "Högskolan Kristianstad",
-		LongNameEn: "",
+		LongNameEn: "Kristianstad University",
 	},
 	"hv": {
 		LongNameSv: "Högskolan Väst",
-		LongNameEn: "",
+		LongNameEn: "University West",
 	},
 	"kau": {
 		LongNameSv: "Karlstads universitet",
-		LongNameEn: "",
+		LongNameEn: "Karlstad University",
 	},
 	"ki": {
 		LongNameSv: "Karolinska institutet",
-		LongNameEn: "",
+		LongNameEn: "Karolinska Institute",
 	},
 	"kf": {
 		LongNameSv: "Konstfack",
-		LongNameEn: "",
+		LongNameEn: "University of Arts, Crafts and Design",
 	},
 	"kkh": {
-		LongNameSv: "Kungl. Konsthögskolan",
-		LongNameEn: "",
+		LongNameSv: "Kungliga Konsthögskolan",
+		LongNameEn: "Royal Institute of Art",
 	},
 	"kmh": {
-		LongNameSv: "Kungl. Musikhögskolan i Stockholm",
-		LongNameEn: "",
+		LongNameSv: "Kungliga Musikhögskolan i Stockholm",
+		LongNameEn: "Royal College of Music in Stockholm",
 	},
 	"kth": {
-		LongNameSv: "kungliga tekniska högskolan",
-		LongNameEn: "",
+		LongNameSv: "Kungliga tekniska högskolan",
+		LongNameEn: "Royal Institute of Technology",
 	},
 	"liu": {
 		LongNameSv: "Linköpings universitet",
-		LongNameEn: "",
+		LongNameEn: "Linköping University",
 	},
 	"lnu": {
-		LongNameSv: "linne universitetet",
-		LongNameEn: "",
+		LongNameSv: "Linnéuniversitetet",
+		LongNameEn: "Linnaeus University",
 	},
 	"ltu": {
 		LongNameSv: "Luleå tekniska universitet",
-		LongNameEn: "",
+		LongNameEn: "Luleå University of Technology",
 	},
 	"lu": {
 		LongNameSv: "Lunds universitet",
-		LongNameEn: "",
+		LongNameEn: "Lund University",
 	},
 	"mau": {
 		LongNameSv: "Malmö universitet",
-		LongNameEn: "",
+		LongNameEn: "Malmö university",
 	},
 	"miu": {
 		LongNameSv: "Mittuniversitetet",
-		LongNameEn: "",
+		LongNameEn: "Mid Sweden University",
 	},
 	"mdh": {
 		LongNameSv: "Mälardalens högskola",
-		LongNameEn: "",
+		LongNameEn: "Mälardalen University",
 	},
 	"ni": {
 		LongNameSv: "Newmaninstitutet",
-		LongNameEn: "",
+		LongNameEn: "Newman Institute University College",
 	},
 	"rkh": {
 		LongNameSv: "Röda Korsets högskola",
-		LongNameEn: "",
+		LongNameEn: "The Swedish Red Cross University College",
 	},
 	"shh": {
 		LongNameSv: "Sophiahemmet Högskola",
-		LongNameEn: "",
+		LongNameEn: "Sophiahemmet University",
 	},
 	"hj": {
 		LongNameSv: "Stiftelsen Högskolan i Jönköping",
-		LongNameEn: "",
+		LongNameEn: "Jönköping University",
 	},
 	"skh": {
 		LongNameSv: "Stockholms konstnärliga högskola",
-		LongNameEn: "",
+		LongNameEn: "Stockholm University of the Arts",
 	},
 	"su": {
 		LongNameSv: "Stockholms universitet",
-		LongNameEn: "",
+		LongNameEn: "Stockholm University",
 	},
 	"slu": {
 		LongNameSv: "Sveriges lantbruksuniversitet",
-		LongNameEn: "",
+		LongNameEn: "Swedish University of Agricultural Sciences",
 	},
 	"sh": {
 		LongNameSv: "Södertörns högskola",
-		LongNameEn: "",
+		LongNameEn: "Södertörn University",
 	},
 	"umu": {
 		LongNameSv: "Umeå universitet",
-		LongNameEn: "",
+		LongNameEn: "Umeå University",
 	},
 	"uu": {
 		LongNameSv: "Uppsala universitet",
-		LongNameEn: "",
+		LongNameEn: "Uppsala University",
 	},
 	"oru": {
 		LongNameSv: "Örebro universitet",
-		LongNameEn: "",
+		LongNameEn: "Örebro University",
 	},
 }
 
@@ -161,6 +161,7 @@ var SchoolsList = []string{"bth", "cth", "ehs", "esh", "fhs", "ghi", "gu", "hda"
 
 // SchoolInfo collect information about a school
 type SchoolInfo struct {
-	LongNameSv string `json:"long_name_sv"`
-	LongNameEn string `json:"long_name_en"`
+	LongNameSv    string `json:"long_name_sv"`
+	LongNameEn    string `json:"long_name_en"`
+	CoordinateLat string `json:"coordinate_lat"`
 }
