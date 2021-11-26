@@ -161,7 +161,6 @@ var SchoolsList = []string{"bth", "cth", "ehs", "esh", "fhs", "ghi", "gu", "hda"
 
 // SchoolInfo collect information about a school
 type SchoolInfo struct {
-	LongNameSv    string `json:"long_name_sv"`
-	LongNameEn    string `json:"long_name_en"`
-	CoordinateLat string `json:"coordinate_lat"`
+	LongNameSv string `json:"long_name_sv"`
+	LongNameEn string `json:"long_name_en"`
 }
