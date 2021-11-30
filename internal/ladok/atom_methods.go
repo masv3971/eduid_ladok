@@ -16,6 +16,10 @@ func (s *AtomService) run(ctx context.Context) {
 	if err != nil {
 		s.logger.Warn("recent", err)
 	}
+	if superFeed == nil {
+		s.logger.Warn("Feed return nil")
+		return
+	}
 	currentID := superFeed.ID
 
 	if currentID == 0 {
