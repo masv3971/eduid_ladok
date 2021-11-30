@@ -16,5 +16,5 @@ build-eduid_ladok-arm:
 
 build-eduid_ladok-linux:
 		@echo building-static
-		CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -o ./bin/${NAME} ${LDFLAGS} ./cmd/main.go
+		CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/${NAME} ${LDFLAGS} ./cmd/main.go
 		@echo Done
