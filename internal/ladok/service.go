@@ -4,7 +4,6 @@ import (
 	"context"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
-	"fmt"
 
 	"sync"
 )
@@ -63,7 +62,6 @@ func New(ctx context.Context, config Config, wg *sync.WaitGroup, schoolName stri
 	if err := s.getSchoolID(ctx); err != nil {
 		s.logger.Warn("getSchool", err.Error())
 	}
-	fmt.Println("MURA ID", s.SchoolID)
 
 	return s, nil
 }
