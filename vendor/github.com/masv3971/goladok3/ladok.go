@@ -25,6 +25,7 @@ type Config struct {
 	CertificatePEM []byte            `validate:"required"`
 	PrivateKey     *rsa.PrivateKey   `validate:"required"`
 	PrivateKeyPEM  []byte            `validate:"required"`
+	ProxyURL       string
 	//Chain         []*x509.Certificate `validate:"required"`
 }
 
@@ -41,6 +42,7 @@ type Client struct {
 	chainPEM       []byte
 	privateKey     *rsa.PrivateKey
 	privateKeyPEM  []byte
+	proxyURL       string
 
 	Kataloginformation *kataloginformationService
 	Studentinformation *studentinformationService
@@ -56,6 +58,7 @@ func New(config Config) (*Client, error) {
 	c := &Client{
 		format:         "json",
 		url:            config.URL,
+		proxyURL:       config.ProxyURL,
 		privateKeyPEM:  config.PrivateKeyPEM,
 		certificatePEM: config.CertificatePEM,
 		certificate:    config.Certificate,
@@ -100,11 +103,24 @@ func (c *Client) httpConfigure() error {
 
 	tlsCfg.BuildNameToCertificate()
 
+	var proxyConfig func(*http.Request) (*url.URL, error)
+	if c.proxyURL != "" {
+		proxyURL, err := url.Parse(c.proxyURL)
+		if err != nil {
+			return err
+		}
+
+		proxyConfig = http.ProxyURL(proxyURL)
+	} else {
+		proxyConfig = nil
+	}
+
 	c.HTTPClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig:     tlsCfg,
 			DialContext:         nil,
 			TLSHandshakeTimeout: 30 * time.Second,
+			Proxy:               proxyConfig,
 		},
 	}
 

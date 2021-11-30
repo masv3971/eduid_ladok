@@ -34,3 +34,4 @@ v0.0.50 : Remove password field.
 v0.0.51 : Change from DER to PEM.
 v0.0.52 : Add a bunch of endpoints and test.
 v0.0.53 : Add mock student data.
+v0.0.54 : Add proxy url support.

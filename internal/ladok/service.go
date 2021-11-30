@@ -20,6 +20,8 @@ type Config struct {
 	RedisDB int `required:"true" split_words:"true" envconfig:"REDIS_DB"`
 	// LadokAtomPeriodicity amount of seconds between fetches
 	LadokAtomPeriodicity int `required:"true" split_words:"true" envconfig:"LADOK_ATOM_PERIODICITY"`
+	// HTTPProxy used with haProxy
+	HTTPProxy string `split_words:"true" envconfig:"HTTP_PROXY"`
 }
 
 // Service holds service object for ladok

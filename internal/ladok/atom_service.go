@@ -46,6 +46,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 	var err error
 	s.ladok, err = goladok3.New(goladok3.Config{
 		URL:            s.Service.config.LadokURL,
+		ProxyURL:       s.Service.config.HTTPProxy,
 		Certificate:    s.Service.Certificate.Cert,
 		CertificatePEM: s.Service.Certificate.CertPEM,
 		PrivateKey:     s.Service.Certificate.PrivateKey,
