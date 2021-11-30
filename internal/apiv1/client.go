@@ -26,5 +26,7 @@ func New(config Config, ladoks map[string]*ladok.Service, schoolNames []string, 
 		schoolNames: schoolNames,
 	}
 
+	c.logger.Info("Started")
+
 	return c, nil
 }

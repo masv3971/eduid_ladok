@@ -52,6 +52,7 @@ func New(ctx context.Context, config Config, wg *sync.WaitGroup, feedName string
 	s.wg.Add(1)
 	go s.run(ctx)
 
+	s.logger.Info("Started")
 	return s, nil
 }
 

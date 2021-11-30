@@ -49,5 +49,7 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 		}
 	}()
 
+	s.logger.Info("Started")
+
 	return s, nil
 }

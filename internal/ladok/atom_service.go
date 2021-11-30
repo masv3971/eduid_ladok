@@ -12,19 +12,21 @@ import (
 
 // AtomService holds the service object
 type AtomService struct {
-	Service *Service
-	logger  *logger.Logger
-	Channel chan *model.LadokToAggregateMSG
-	ladok   *goladok3.Client
-	db      *redis.Client
+	Service     *Service
+	logger      *logger.Logger
+	Channel     chan *model.LadokToAggregateMSG
+	ladok       *goladok3.Client
+	db          *redis.Client
+	quitRunChan chan bool
 }
 
 // NewAtomService create a new instance of ladok rest
 func NewAtomService(ctx context.Context, service *Service, channel chan *model.LadokToAggregateMSG, logger *logger.Logger) (*AtomService, error) {
 	s := &AtomService{
-		Channel: channel,
-		Service: service,
-		logger:  logger,
+		Channel:     channel,
+		Service:     service,
+		logger:      logger,
+		quitRunChan: make(chan bool),
 	}
 
 	switch len(s.Service.config.RedisAddr) {
@@ -59,7 +61,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 			select {
 			case <-ticker.C:
 				s.run(ctx)
-			case <-ctx.Done():
+			case <-s.quitRunChan:
 				s.logger.Warn("run stopped")
 				ticker.Stop()
 				return
@@ -67,13 +69,14 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		}
 	}()
 
+	s.logger.Info("Started")
 	return s, nil
 }
 
 // Close closes ladok atom service
 func (s *AtomService) Close(ctx context.Context) error {
 	s.logger.Warn("Quit")
-
+	s.quitRunChan <- true
 	ctx.Done()
 	return nil
 }

@@ -33,6 +33,7 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 		return nil, err
 	}
 
+	s.logger.Info("Started")
 	return s, nil
 }
 
