@@ -37,7 +37,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		})
 	default:
 		s.db = redis.NewFailoverClient(&redis.FailoverOptions{
-			MasterName:    "redis-cluster",
+			MasterName:    "master",
 			SentinelAddrs: s.Service.config.RedisAddr,
 			DB:            service.config.RedisDB,
 		})
