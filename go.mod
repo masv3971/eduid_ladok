@@ -28,7 +28,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-redis/redismock/v8 v8.0.6
 	github.com/masv3971/goeduidiam v0.0.9
-	github.com/masv3971/goladok3 v0.0.62
+	github.com/masv3971/goladok3 v0.0.63
 )
 
 require (

@@ -9,12 +9,9 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/masv3971/goladok3/ladoktypes"
@@ -29,12 +26,10 @@ type Config struct {
 	PrivateKey     *rsa.PrivateKey   `validate:"required"`
 	PrivateKeyPEM  []byte            `validate:"required"`
 	ProxyURL       string
-	//Chain         []*x509.Certificate `validate:"required"`
 }
 
 // Client holds the ladok object
 type Client struct {
-	//password       string
 	HTTPClient     *http.Client
 	rateLimit      *rate.Limiter
 	format         string
@@ -105,20 +100,6 @@ func (c *Client) httpConfigure() error {
 	}
 
 	tlsCfg.BuildNameToCertificate()
-
-	//	var proxyConfig func(*http.Request) (*url.URL, error)
-	//	if c.proxyURL != "" {
-	//		proxyURL, err := url.Parse(c.proxyURL)
-	//		if err != nil {
-	//			return err
-	//		}
-	//
-	//		proxyConfig = http.ProxyURL(proxyURL)
-	//		fmt.Println("LOGGING, using proxy:", proxyURL)
-	//	} else {
-	//		proxyConfig = nil
-	//		fmt.Println("LOGGING, no proxy is using")
-	//	}
 
 	c.HTTPClient = &http.Client{
 		Transport: &http.Transport{
@@ -204,11 +185,6 @@ func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, pa
 	req.Header.Set("Accept", acceptHeader)
 	req.Header.Set("User-Agent", "goladok3/0.0.15")
 
-	if os.Getenv("DEBUG") == "true" {
-		out, _ := httputil.DumpRequest(req, false)
-		fmt.Println("DEBUG dumprequest", string(out))
-	}
-
 	return req, nil
 }
 
@@ -224,11 +200,6 @@ func (c *Client) do(req *http.Request, value interface{}) (*http.Response, error
 		return nil, oneError("Can't perform http.client.do", "HTTPClient.Do", "do", err.Error())
 	}
 	defer resp.Body.Close()
-
-	if os.Getenv("DEBUG") == "true" {
-		out, _ := httputil.DumpResponse(resp, false)
-		fmt.Println("DEBUG dumpResponse", string(out))
-	}
 
 	if err := checkResponse(resp); err != nil {
 		buf := &bytes.Buffer{}

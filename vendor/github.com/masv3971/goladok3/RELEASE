@@ -43,3 +43,4 @@ v0.0.59 : Trying with ProxyFromEnvironment.
 v0.0.60 : New place for proxy config.
 v0.0.61 : Add proxyHeader.
 v0.0.62 : TLS config.
+v0.0.63 : Remove unnecessary debugging related to proxy.

@@ -114,6 +114,8 @@ github.com/masv3971/goladok3 v0.0.61 h1:YpAtAAQ86Ja5MchJCH1zuWzRIdS7zJmPbZCS69u3
 github.com/masv3971/goladok3 v0.0.61/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
 github.com/masv3971/goladok3 v0.0.62 h1:0SyO5A74RGbrJEePBDCITNcxHDneP4IikvfSCtr2e5Y=
 github.com/masv3971/goladok3 v0.0.62/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
+github.com/masv3971/goladok3 v0.0.63 h1:BrISzbaqUpiiDk6Up2LIJ93lMTYhZt0Sc48h4Uaftc4=
+github.com/masv3971/goladok3 v0.0.63/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
 github.com/mattn/go-colorable v0.1.11 h1:nQ+aFkoE2TMGc0b68U2OKSexC+eq46+XwZzWXHRmPYs=
 github.com/mattn/go-colorable v0.1.11/go.mod h1:u5H1YNBxpqRaxsYJYSkiCWKzEfiAb1Gb520KVy5xxl4=
 github.com/mattn/go-colorable v0.1.12 h1:jF+Du6AlPIjs2BiUiQlKOX0rt3SujHxPnksPKZbaA40=
