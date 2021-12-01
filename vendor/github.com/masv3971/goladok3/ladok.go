@@ -9,9 +9,12 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/masv3971/goladok3/ladoktypes"
@@ -103,25 +106,32 @@ func (c *Client) httpConfigure() error {
 
 	tlsCfg.BuildNameToCertificate()
 
-	var proxyConfig func(*http.Request) (*url.URL, error)
-	if c.proxyURL != "" {
-		proxyURL, err := url.Parse(c.proxyURL)
-		if err != nil {
-			return err
-		}
-
-		proxyConfig = http.ProxyURL(proxyURL)
-	} else {
-		proxyConfig = nil
-	}
+	//	var proxyConfig func(*http.Request) (*url.URL, error)
+	//	if c.proxyURL != "" {
+	//		proxyURL, err := url.Parse(c.proxyURL)
+	//		if err != nil {
+	//			return err
+	//		}
+	//
+	//		proxyConfig = http.ProxyURL(proxyURL)
+	//		fmt.Println("LOGGING, using proxy:", proxyURL)
+	//	} else {
+	//		proxyConfig = nil
+	//		fmt.Println("LOGGING, no proxy is using")
+	//	}
 
 	c.HTTPClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig:     tlsCfg,
 			DialContext:         nil,
 			TLSHandshakeTimeout: 30 * time.Second,
-			Proxy:               proxyConfig,
+			//ProxyConnectHeader: ,
+			Proxy: http.ProxyFromEnvironment,
 		},
+	}
+
+	if os.Getenv("DEBUG") == "true" {
+		fmt.Println("DEBUG HTTPClient transport", c.HTTPClient.Transport)
 	}
 
 	return nil
@@ -198,6 +208,11 @@ func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, pa
 	req.Header.Set("Accept", acceptHeader)
 	req.Header.Set("User-Agent", "goladok3/0.0.15")
 
+	if os.Getenv("DEBUG") == "true" {
+		out, _ := httputil.DumpRequest(req, false)
+		fmt.Println("DEBUG dumprequest", string(out))
+	}
+
 	return req, nil
 }
 
@@ -213,6 +228,11 @@ func (c *Client) do(req *http.Request, value interface{}) (*http.Response, error
 		return nil, oneError("Can't perform http.client.do", "HTTPClient.Do", "do", err.Error())
 	}
 	defer resp.Body.Close()
+
+	if os.Getenv("DEBUG") == "true" {
+		out, _ := httputil.DumpResponse(resp, false)
+		fmt.Println("DEBUG dumpResponse", string(out))
+	}
 
 	if err := checkResponse(resp); err != nil {
 		buf := &bytes.Buffer{}

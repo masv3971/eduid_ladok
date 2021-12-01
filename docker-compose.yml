@@ -1,21 +1,42 @@
 ---
-version: "3.9"
+version: "3"
 
 services:
-  eduid_ladok:
+ eduid_ladok:
     container_name: "eduid_ladok"
     build:
       context: .
     image: eduid_ladok
     volumes:
       - eduid_ladok:/data
+      - ./cert:/cert:ro
     depends_on:
       - redis
     networks:
       eduid_ladok-net:
         ipv4_address: 172.16.20.2
+    expose:
+      - 8080
+    environment:
+      - "LOGXI=*"
+      - "DEBUG=true"
+      - "HOST=:8080"
+      - "SCHOOL_NAMES=kf,lnu"
+      - "LADOK_URL=https://api.integrationstest.ladok.se"
+      - "EDUID_IAM_URL=https://api.dev.eduid.se/scim/test"
+      - "JWT_URL=https://auth-test.sunet.se"
+      - "REDIS_DB=3"
+      - "REDIS_ADDR=redis:6379,"
+      - "LADOK_ATOM_PERIODICITY=60"
+      - "LADOK_CERTIFICATE_FOLDER=cert"
+      - "KF_SAML_NAME=student.konstfack.se"
+      - "LNU_SAML_NAME=lnu.se"
+      - "HTTP_PROXY=haproxy:8080"
+      #- "http_proxy=http://proxy.dev.eduid.se:8080"
+      #- "HTTPS_PROXY=http://proxy.dev.eduid.se:8080"
+      #- "https_proxy=http://proxy.dev.eduid.se:8080"
 
-  redis:
+ redis:
     image: redis:alpine
     container_name: "redis"
     expose:
@@ -27,6 +48,25 @@ services:
       eduid_ladok-net:
         ipv4_address: 172.16.20.3
 
+ haproxy:
+    image: 'docker.sunet.se/eduid/haproxy:latest'
+    restart: always
+    ports:
+      - 8443:443
+    networks:
+      eduid_ladok-net:
+        ipv4_address: 172.16.20.4
+    volumes:
+      - ./haproxy.cfg:/haproxy.cfg
+      - ./pki/eduid_ladok.crt:/etc/ssl/eduid_ladok.crt:ro
+      #- /opt/eduid/ladok-haproxy/etc/:/etc/haproxy/:ro
+      #- '/etc/ssl/private/worker-tug-1.eduid.se_haproxy.crt:/etc/ssl/private/worker-tug-1.eduid.se_haproxy.crt:ro'
+      - /tmp/halog:/dev/log
+      - 'haproxy_control:/var/run/haproxy-control'
+    links:
+      - eduid_ladok
+    depends_on:
+      - eduid_ladok
 
 networks:
   eduid_ladok-net:
@@ -40,20 +80,4 @@ networks:
 volumes:
     redis_data:
     eduid_ladok:
-
-
-
-
-#ENV LOGXI=* \
-#    DEBUG=true \
-#    HOST=":8080" \
-#    SCHOOL_NAMES="kf,lnu" \
-#    KF_SAML_NAME="student.konstfack.se" \
-#    LNU_SAML_NAME="lnu.se" \
-#    LADOK_URL="https://api.integrationstest.ladok.se" \
-#    LADOK_ATOM_PERIODICITY="60" \
-#    EDUID_IAM_URL="https://api.dev.eduid.se/scim/test" \
-#    JWT_URL="https://auth-test.sunet.se" \
-#    LADOK_CERTIFICATE_FOLDER="cert" \
-#    REDIS_ADDR="redis:6379" \
-#    REDIS_DB="3"
+    haproxy_control:

@@ -10,6 +10,7 @@ func (s *Service) getSchoolID(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	if len(r.Larosatesinformation) == 0 {
 		return errors.New("Larosatesinformation is empty")
 	}

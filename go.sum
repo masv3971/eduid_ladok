@@ -98,6 +98,16 @@ github.com/masv3971/goladok3 v0.0.53 h1:x2s01Y91n+ghUexoA0GmIwrY2XjYeAfh4dHMICsD
 github.com/masv3971/goladok3 v0.0.53/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
 github.com/masv3971/goladok3 v0.0.54 h1:3boEwJu1fjeVHxAzTPJEk934J++BJMhAKLWKxn/uWEk=
 github.com/masv3971/goladok3 v0.0.54/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
+github.com/masv3971/goladok3 v0.0.55 h1:CmWWghxK/c8S8TJcnWMiv4thBMrDwYg65aoidchgick=
+github.com/masv3971/goladok3 v0.0.55/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
+github.com/masv3971/goladok3 v0.0.56 h1:wq+evsPrkI0yJLn1QtgoUPzh40qVeaieVn14awaan0Q=
+github.com/masv3971/goladok3 v0.0.56/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
+github.com/masv3971/goladok3 v0.0.57 h1:yTO8HXgSGbZKX7Xd0U5C3xDLc4yhehbFCeAHOI0quaQ=
+github.com/masv3971/goladok3 v0.0.57/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
+github.com/masv3971/goladok3 v0.0.58 h1:3HJ8uJdHWvMqzKjsCRUWWQkJ/ndVyeJdqrgeRyRz1/I=
+github.com/masv3971/goladok3 v0.0.58/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
+github.com/masv3971/goladok3 v0.0.59 h1:OYNqZaXD3X324Dec4BRvcf5/bdJLhrm41FFVocS43dk=
+github.com/masv3971/goladok3 v0.0.59/go.mod h1:bsPPV8670FA/4E5SzF5em9MNC24qfsoAowdQqP5K45s=
 github.com/mattn/go-colorable v0.1.11 h1:nQ+aFkoE2TMGc0b68U2OKSexC+eq46+XwZzWXHRmPYs=
 github.com/mattn/go-colorable v0.1.11/go.mod h1:u5H1YNBxpqRaxsYJYSkiCWKzEfiAb1Gb520KVy5xxl4=
 github.com/mattn/go-colorable v0.1.12 h1:jF+Du6AlPIjs2BiUiQlKOX0rt3SujHxPnksPKZbaA40=

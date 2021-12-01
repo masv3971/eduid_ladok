@@ -6,3 +6,5 @@ notes.txt
 bin
 docker-compose.yaml
 Dockerfile
+pki/*.crt
+pki/*.key
