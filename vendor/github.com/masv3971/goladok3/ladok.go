@@ -125,12 +125,8 @@ func (c *Client) httpConfigure() error {
 			TLSClientConfig:     tlsCfg,
 			DialContext:         nil,
 			TLSHandshakeTimeout: 30 * time.Second,
-			//	Proxy:               http.ProxyFromEnvironment,
+			Proxy:               http.ProxyFromEnvironment,
 		},
-	}
-
-	if os.Getenv("DEBUG") == "true" {
-		fmt.Println("DEBUG HTTPClient transport", c.HTTPClient.Transport)
 	}
 
 	return nil
@@ -200,18 +196,6 @@ func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, pa
 	req, err := http.NewRequestWithContext(ctx, method, url.String(), buf)
 	if err != nil {
 		return nil, oneError("", "http.NewRequestWithContext", "newRequest", err.Error())
-	}
-
-	proxyURL, err := http.ProxyFromEnvironment(req)
-	if err != nil {
-		return nil, err
-	}
-
-	c.HTTPClient = &http.Client{
-		Transport: &http.Transport{
-			ProxyConnectHeader: make(http.Header),
-			Proxy:              http.ProxyURL(proxyURL),
-		},
 	}
 
 	if body != nil {
