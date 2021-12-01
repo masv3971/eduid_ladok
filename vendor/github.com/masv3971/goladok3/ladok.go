@@ -125,8 +125,7 @@ func (c *Client) httpConfigure() error {
 			TLSClientConfig:     tlsCfg,
 			DialContext:         nil,
 			TLSHandshakeTimeout: 30 * time.Second,
-			//ProxyConnectHeader: ,
-			Proxy: http.ProxyFromEnvironment,
+			//	Proxy:               http.ProxyFromEnvironment,
 		},
 	}
 
@@ -202,6 +201,19 @@ func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, pa
 	if err != nil {
 		return nil, oneError("", "http.NewRequestWithContext", "newRequest", err.Error())
 	}
+
+	proxyURL, err := http.ProxyFromEnvironment(req)
+	if err != nil {
+		return nil, err
+	}
+
+	c.HTTPClient = &http.Client{
+		Transport: &http.Transport{
+			ProxyConnectHeader: make(http.Header),
+			Proxy:              http.ProxyURL(proxyURL),
+		},
+	}
+
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}

@@ -40,3 +40,5 @@ v0.0.56 : Add debugging.
 v0.0.57 : Fix debugging.
 v0.0.58 : Add more debugging.
 v0.0.59 : Trying with ProxyFromEnvironment.
+v0.0.60 : New place for proxy config.
+v0.0.61 : Add proxyHeader.
