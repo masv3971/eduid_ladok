@@ -75,6 +75,28 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 	return s, nil
 }
 
+// StatusRedis return the status of redis
+func (s *AtomService) StatusRedis(ctx context.Context) *model.Status {
+	ping := s.db.Ping(ctx).String()
+	status := &model.Status{
+		Name:       "redis",
+		SchoolName: s.Service.schoolName,
+		Healthy:    false,
+		Status:     model.StatusFail,
+		Timestamp:  time.Now(),
+	}
+
+	switch ping {
+	case "ping: PONG":
+		status.Status = model.StatusOK
+		status.Healthy = true
+
+		return status
+	default:
+		return status
+	}
+}
+
 // Close closes ladok atom service
 func (s *AtomService) Close(ctx context.Context) error {
 	s.logger.Warn("Quit")

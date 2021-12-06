@@ -13,12 +13,10 @@ import (
 
 func mockCertificate(t *testing.T, notBefore, notAfter int, folder string) {
 	certPEM, _, privateKeyPEM, _ := ladokmocks.MockCertificateAndKey(t, ladoktypes.EnvIntTestAPI, 0, 100)
-	//fmt.Println("cert", cert, "privateKey", privateKey, "chain", chain[0])
 
 	cryptoParts := map[string][]byte{
 		"crt": certPEM,
 		"key": privateKeyPEM,
-		//"pem": chainData,
 	}
 
 	for ext, data := range cryptoParts {

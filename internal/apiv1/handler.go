@@ -4,7 +4,6 @@ import (
 	"context"
 	"eduid_ladok/pkg/model"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/masv3971/goladok3"
@@ -72,17 +71,17 @@ func (c *Client) SchoolInfo(indata *RequestSchoolInfo) (*ReplySchoolInfo, error)
 
 // Status return status for each ladok instance
 func (c *Client) Status() (*model.Status, error) {
-	status := &model.Status{
-		Status: fmt.Sprintf("%s_eduid_ladok_", model.StatusOK),
+	ctx := context.Background()
+	manyStatus := model.ManyStatus{}
+
+	for _, ladok := range c.ladoks {
+		redis := ladok.Atom.StatusRedis(ctx)
+		ladok := ladok.Rest.StatusLadok(ctx)
+
+		manyStatus = append(manyStatus, redis)
+		manyStatus = append(manyStatus, ladok)
 	}
+	status := manyStatus.Check()
 
-	//for _, ladok := range c.ladoks {
-	//	status, err := ladok.Status()
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	allStatus = append(allStatus, status)
-
-	//}
 	return status, nil
 }

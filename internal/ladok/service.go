@@ -68,18 +68,6 @@ func New(ctx context.Context, config Config, wg *sync.WaitGroup, schoolName stri
 	return s, nil
 }
 
-// Status checks if the status if good
-func (s *Service) Status() (*model.Status, error) {
-	//	status := &model.Status{
-	//		Name:       "Ladok",
-	//		SchoolName: s.schoolName,
-	//		Timestamp:  time.Now(),
-	//		//Status:     fmt.Sprintf("%s),
-	//		Message: "",
-	//	}
-	return nil, nil
-}
-
 // Close closes ladok
 func (s *Service) Close(ctx context.Context) error {
 	s.Atom.Close(ctx)
