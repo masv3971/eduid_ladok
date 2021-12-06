@@ -46,8 +46,11 @@ func (s *Service) run(ctx context.Context) {
 		//entry.AddTimestamp("aggregate arrived")
 		//s.whatToDo(entry)
 		//s.logger.Info("Process event", entry.Payload.EntryID, entry.Payload.EventType)
-		default:
+		case <-s.quitChannel:
+			return
 		}
+		//	default:
+		//	}
 	}
 }
 

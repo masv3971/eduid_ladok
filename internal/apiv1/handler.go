@@ -72,7 +72,9 @@ func (c *Client) SchoolInfo(indata *RequestSchoolInfo) (*ReplySchoolInfo, error)
 
 // Status return status for each ladok instance
 func (c *Client) Status() (*model.Status, error) {
-	//allStatus := []*model.Status{}
+	status := &model.Status{
+		Status: fmt.Sprintf("%s_eduid_ladok_", model.StatusOK),
+	}
 
 	//for _, ladok := range c.ladoks {
 	//	status, err := ladok.Status()
@@ -82,8 +84,5 @@ func (c *Client) Status() (*model.Status, error) {
 	//	allStatus = append(allStatus, status)
 
 	//}
-	status := &model.Status{
-		Status: fmt.Sprintf("%s_eduid_ladok_", model.StatusOK),
-	}
 	return status, nil
 }
