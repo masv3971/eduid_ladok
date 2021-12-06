@@ -66,6 +66,8 @@ func New(config Config, api *apiv1.Client, logger *logger.Logger) (*Service, err
 	s.regEndpoint("api/v1/:schoolName/ladokinfo", "POST", s.endpointLadokInfo)
 	s.regEndpoint("api/v1/schoolinfo", "GET", s.endpointSchoolInfo)
 
+	s.regEndpoint("api/v1/status", "GET", s.endpointStatus)
+
 	// Run http server
 	go func() {
 		err := s.server.ListenAndServe()

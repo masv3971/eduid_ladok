@@ -29,3 +29,11 @@ func (s *Service) endpointSchoolInfo(c *gin.Context) (interface{}, error) {
 	}
 	return reply, nil
 }
+
+func (s *Service) endpointStatus(c *gin.Context) (interface{}, error) {
+	reply, err := s.apiv1.Status()
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
