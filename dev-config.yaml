@@ -1,0 +1,39 @@
+---
+eduid:
+  worker:
+    common:
+      debug: yes
+    ladokx:
+      api_server:
+        host: :8080
+    ladok:
+      api_server:
+        host: :8080
+      debug: true
+      schools:
+        kf: 
+          saml_name: student.konstfack.se
+        lnu:
+          saml_name: lnu.se 
+      ladok:
+        url: https://api.integrationstest.ladok.se
+        certificate:
+          folder: cert
+        atom:
+          periodicity: 60 
+      eduid:
+        iam:
+          url: https://api.dev.eduid.se/scim/test 
+      sunet:
+        auth:
+          url: https://auth-test.sunet.se 
+      redis:
+        db: 3
+        #host: localhost:6379
+        sentinel_hosts:
+          - localhost:1231
+          - localhost:12313
+        sentinel_service_name: redis-cluster
+    x_service:
+      api_server:
+        host: 8080

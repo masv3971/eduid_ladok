@@ -17,8 +17,8 @@ import (
 // importCertificate read crt, key and pem file and put it the certificate handler.
 func (s *CertificateService) importCertificate() error {
 	var (
-		certPath = filepath.Join(s.Service.config.LadokCertificateFolder, fmt.Sprintf("%s.%s", s.Service.schoolName, "crt"))
-		keyPath  = filepath.Join(s.Service.config.LadokCertificateFolder, fmt.Sprintf("%s.%s", s.Service.schoolName, "key"))
+		certPath = filepath.Join(s.Service.config.Ladok.Certificate.Folder, fmt.Sprintf("%s.%s", s.Service.schoolName, "crt"))
+		keyPath  = filepath.Join(s.Service.config.Ladok.Certificate.Folder, fmt.Sprintf("%s.%s", s.Service.schoolName, "key"))
 	)
 
 	for _, file := range []string{certPath, keyPath} {

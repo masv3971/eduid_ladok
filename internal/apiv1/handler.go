@@ -59,10 +59,10 @@ func (c *Client) SchoolInfo(indata *RequestSchoolInfo) (*ReplySchoolInfo, error)
 	replySchoolNames := &ReplySchoolInfo{}
 	sn := make(map[string]model.SchoolInfo)
 
-	for _, name := range c.schoolNames {
-		schoolInfo, ok := model.Schools[name]
+	for schoolName := range c.config.Schools {
+		schoolInfo, ok := model.Schools[schoolName]
 		if ok {
-			sn[name] = schoolInfo
+			sn[schoolName] = schoolInfo
 		}
 	}
 	replySchoolNames.Schools = sn

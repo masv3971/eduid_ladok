@@ -29,25 +29,29 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		quitRunChan: make(chan bool),
 	}
 
-	switch len(s.Service.config.RedisAddr) {
-	case 1:
+	switch s.Service.config.Redis.Addr != "" {
+	case true:
 		s.db = redis.NewClient(&redis.Options{
-			Addr: s.Service.config.RedisAddr[0],
-			DB:   s.Service.config.RedisDB,
+			Addr: s.Service.config.Redis.Addr,
+			DB:   s.Service.config.Redis.DB,
 		})
 	default:
 		s.db = redis.NewFailoverClient(&redis.FailoverOptions{
-			MasterName:    "redis-cluster",
-			SentinelAddrs: s.Service.config.RedisAddr,
-			DB:            service.config.RedisDB,
+			MasterName:    s.Service.config.Redis.SentinelServiceName,
+			SentinelAddrs: s.Service.config.Redis.SentinelHosts,
+			DB:            service.config.Redis.DB,
 		})
+	}
 
+	// Non intrusive check if redis is reachable, this will not stop the program even if non contactable.
+	if status := s.StatusRedis(context.TODO()); !status.Healthy {
+		s.logger.Error("Cant connect to redis")
 	}
 
 	var err error
 	s.ladok, err = goladok3.New(goladok3.Config{
-		URL:            s.Service.config.LadokURL,
-		ProxyURL:       s.Service.config.HTTPProxy,
+		URL: s.Service.config.Ladok.URL,
+		//ProxyURL:       s.Service.config.HTTPProxy, //TODO(masv): Can I remove this?
 		Certificate:    s.Service.Certificate.Cert,
 		CertificatePEM: s.Service.Certificate.CertPEM,
 		PrivateKey:     s.Service.Certificate.PrivateKey,
@@ -57,7 +61,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		return nil, err
 	}
 
-	ticker := time.NewTicker(time.Duration(s.Service.config.LadokAtomPeriodicity) * time.Second)
+	ticker := time.NewTicker(time.Duration(s.Service.config.Ladok.Atom.Periodicity) * time.Second)
 	go func() {
 		for {
 			select {

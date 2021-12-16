@@ -5,6 +5,7 @@ import (
 	"eduid_ladok/internal/apiv1"
 	"eduid_ladok/pkg/helpers"
 	"eduid_ladok/pkg/logger"
+	"eduid_ladok/pkg/model"
 	"net/http"
 	"time"
 
@@ -13,15 +14,9 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// Config configure httpservice
-type Config struct {
-	Debug bool   `envconfig:"DEBUG"`
-	Host  string `envconfig:"HOST"`
-}
-
 // Service is the service object for httpserver
 type Service struct {
-	config Config
+	config *model.Cfg
 	logger *logger.Logger
 	server *http.Server
 	apiv1  Apiv1
@@ -29,12 +24,12 @@ type Service struct {
 }
 
 // New creates a new httpserver service
-func New(config Config, api *apiv1.Client, logger *logger.Logger) (*Service, error) {
+func New(config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service, error) {
 	s := &Service{
 		config: config,
 		logger: logger,
 		apiv1:  api,
-		server: &http.Server{Addr: config.Host},
+		server: &http.Server{Addr: config.APIServer.Host},
 	}
 
 	if s.config.Debug {

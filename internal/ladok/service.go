@@ -8,25 +8,9 @@ import (
 	"sync"
 )
 
-// Config holds the configuration for ladok
-type Config struct {
-	// LadokURL is the url to ladok rest api
-	LadokURL string `envconfig:"LADOK_URL" required:"true" split_words:"true"`
-	// LadokCertificateFolder points to the certificates file on disk
-	LadokCertificateFolder string `required:"true" split_words:"true" envconfig:"LADOK_CERTIFICATE_FOLDER"` // General
-	// RedisAddr typical "localhost:6379", in docker redis:6379 or in sentinel "redis_1:6379,redis_2:6379"
-	RedisAddr []string `required:"true" split_words:"true" envconfig:"REDIS_ADDR"`
-	// RedisDB redis database number
-	RedisDB int `required:"true" split_words:"true" envconfig:"REDIS_DB"`
-	// LadokAtomPeriodicity amount of seconds between fetches
-	LadokAtomPeriodicity int `required:"true" split_words:"true" envconfig:"LADOK_ATOM_PERIODICITY"`
-	// HTTPProxy used with haProxy
-	HTTPProxy string `split_words:"true" envconfig:"HTTP_PROXY"`
-}
-
 // Service holds service object for ladok
 type Service struct {
-	config     Config
+	config     *model.Cfg
 	wg         *sync.WaitGroup
 	logger     *logger.Logger
 	schoolName string
@@ -38,7 +22,7 @@ type Service struct {
 }
 
 // New creates a new instance of ladok Service object
-func New(ctx context.Context, config Config, wg *sync.WaitGroup, schoolName string, channel chan *model.LadokToAggregateMSG, logger *logger.Logger) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, wg *sync.WaitGroup, schoolName string, channel chan *model.LadokToAggregateMSG, logger *logger.Logger) (*Service, error) {
 	s := &Service{
 		config:     config,
 		logger:     logger,

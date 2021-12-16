@@ -3,27 +3,24 @@ package apiv1
 import (
 	"eduid_ladok/internal/ladok"
 	"eduid_ladok/pkg/logger"
+	"eduid_ladok/pkg/model"
 )
-
-// Config holds the configuration for publicapi
-type Config struct {
-}
 
 // Client holds the publicapi object
 type Client struct {
-	config      Config
+	config      *model.Cfg
 	logger      *logger.Logger
 	ladoks      map[string]*ladok.Service
 	schoolNames []string
 }
 
 // New creates a new instance of publicapi
-func New(config Config, ladoks map[string]*ladok.Service, schoolNames []string, logger *logger.Logger) (*Client, error) {
+func New(config *model.Cfg, ladoks map[string]*ladok.Service, logger *logger.Logger) (*Client, error) {
 	c := &Client{
 		config:      config,
 		logger:      logger,
 		ladoks:      ladoks,
-		schoolNames: schoolNames,
+		schoolNames: []string{"kf", "lnu"},
 	}
 
 	c.logger.Info("Started")
