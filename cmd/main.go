@@ -6,19 +6,14 @@ import (
 	"eduid_ladok/internal/apiv1"
 	"eduid_ladok/internal/httpserver"
 	"eduid_ladok/internal/ladok"
+	"eduid_ladok/pkg/configuration"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-
-	"github.com/kelseyhightower/envconfig"
 )
-
-type config struct {
-	SchoolNames []string `required:"true" split_words:"true"`
-}
 
 type service interface {
 	Close(ctx context.Context) error
@@ -38,32 +33,23 @@ func main() {
 	log = logger.New("eduid_ladok")
 	mainLog = logger.New("main")
 
-	var mainConfig config
-	if err := envconfig.Process("", &mainConfig); err != nil {
+	cfg, err := configuration.Parse(mainLog.New("config_parser"))
+	if err != nil {
 		panic(err)
 	}
 
-	for _, schoolName := range mainConfig.SchoolNames {
+	for schoolName := range cfg.Schools {
 		ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 1000)
 
 		s := make(map[string]service)
 
-		var ladokCfg ladok.Config
-		if err := envconfig.Process(schoolName, &ladokCfg); err != nil {
-			panic(err)
-		}
-		var aggregateCfg aggregate.Config
-		if err := envconfig.Process(schoolName, &aggregateCfg); err != nil {
-			panic(err)
-		}
-
-		ladok, err := ladok.New(ctx, ladokCfg, wg, schoolName, ladokToAggregateChan, log.New(schoolName).New("ladok"))
+		ladok, err := ladok.New(ctx, cfg, wg, schoolName, ladokToAggregateChan, log.New(schoolName).New("ladok"))
 		ladoks[schoolName] = ladok
 		s["ladok"] = ladok
 		if err != nil {
 			panic(err)
 		}
-		aggregate, err := aggregate.New(ctx, aggregateCfg, wg, schoolName, ladok, log.New(schoolName).New("aggregate"))
+		aggregate, err := aggregate.New(ctx, cfg, wg, schoolName, ladok, log.New(schoolName).New("aggregate"))
 		s["aggregate"] = aggregate
 		if err != nil {
 			panic(err)
@@ -74,20 +60,11 @@ func main() {
 
 	s := make(map[string]service)
 
-	var httpserverCfg httpserver.Config
-	if err := envconfig.Process("", &httpserverCfg); err != nil {
-		panic(err)
-	}
-	var apiv1Cfg apiv1.Config
-	if err := envconfig.Process("", &apiv1Cfg); err != nil {
-		panic(err)
-	}
-
-	apiv1, err := apiv1.New(apiv1Cfg, ladoks, mainConfig.SchoolNames, log.New("apiv1"))
+	apiv1, err := apiv1.New(cfg, ladoks, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
-	httpserver, err := httpserver.New(httpserverCfg, apiv1, log.New("httpserver"))
+	httpserver, err := httpserver.New(cfg, apiv1, log.New("httpserver"))
 	s["httpserver"] = httpserver
 	if err != nil {
 		panic(err)

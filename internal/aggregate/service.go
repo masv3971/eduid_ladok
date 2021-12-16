@@ -4,21 +4,15 @@ import (
 	"context"
 	"eduid_ladok/internal/ladok"
 	"eduid_ladok/pkg/logger"
+	"eduid_ladok/pkg/model"
 	"sync"
 
 	"github.com/masv3971/goeduidiam"
 )
 
-// Config holds the configuration for aggregate
-type Config struct {
-	EduIDIAMURL string `required:"true" envconfig:"EDUID_IAM_URL"`
-	JWTURL      string `required:"true" envconfig:"JWT_URL"`
-	SamlName    string `required:"true" envconfig:"SAML_NAME"`
-}
-
 // Service holds the service object for aggregate
 type Service struct {
-	config      Config
+	config      *model.Cfg
 	logger      *logger.Logger
 	wg          *sync.WaitGroup
 	ladok       *ladok.Service
@@ -28,7 +22,7 @@ type Service struct {
 }
 
 // New creates a new instance of aggregate
-func New(ctx context.Context, config Config, wg *sync.WaitGroup, feedName string, ladok *ladok.Service, logger *logger.Logger) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, wg *sync.WaitGroup, feedName string, ladok *ladok.Service, logger *logger.Logger) (*Service, error) {
 	s := &Service{
 		logger:      logger,
 		config:      config,
@@ -38,14 +32,14 @@ func New(ctx context.Context, config Config, wg *sync.WaitGroup, feedName string
 		quitChannel: make(chan bool),
 	}
 	s.eduidiam = goeduidiam.New(goeduidiam.Config{
-		URL: s.config.EduIDIAMURL,
+		URL: s.config.EduID.IAM.URL,
 		Token: goeduidiam.TokenConfig{
 			Certificate: []byte{},
 			PrivateKey:  []byte{},
 			Password:    "",
 			Scope:       "",
 			Type:        "",
-			URL:         s.config.JWTURL,
+			URL:         s.config.Sunet.Auth.URL,
 			Key:         "",
 			Client:      "",
 		},

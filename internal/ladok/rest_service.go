@@ -25,8 +25,8 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 
 	var err error
 	s.Ladok, err = goladok3.New(goladok3.Config{
-		URL:            s.Service.config.LadokURL,
-		ProxyURL:       s.Service.config.HTTPProxy,
+		URL: s.Service.config.Ladok.URL,
+		//ProxyURL:       s.Service.config.HTTPProxy, //TODO(masv): Can I remove this?
 		Certificate:    s.Service.Certificate.Cert,
 		CertificatePEM: s.Service.Certificate.CertPEM,
 		PrivateKey:     s.Service.Certificate.PrivateKey,

@@ -243,10 +243,9 @@ func mockService(t *testing.T, statusCode int, tempDir string) (*Service, *httpt
 
 	ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 200)
 
-	cfg := Config{
-		LadokURL:               server.URL,
-		LadokCertificateFolder: tempDir,
-	}
+	cfg := &model.Cfg{}
+	cfg.Ladok.Certificate.Folder = tempDir
+	cfg.Ladok.URL = server.URL
 
 	mockCertificate(t, 0, 1000, tempDir)
 
