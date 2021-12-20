@@ -239,13 +239,13 @@ func checkResponse(r *http.Response) error {
 	return oneError("Invalid request", "statusCode", "checkResponse", "")
 }
 
-func (c *Client) call(ctx context.Context, acceptHeader, method, url string, req, reply interface{}) (*http.Response, error) {
+func (c *Client) call(ctx context.Context, acceptHeader, method, url string, body, reply interface{}) (*http.Response, error) {
 	request, err := c.newRequest(
 		ctx,
 		acceptHeader,
 		method,
 		url,
-		req,
+		body,
 	)
 	if err != nil {
 		return nil, err

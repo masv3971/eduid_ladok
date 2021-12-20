@@ -31,11 +31,15 @@ func (s *kataloginformationService) GetAnvandareAutentiserad(ctx context.Context
 
 // GetBehorighetsprofilerReq configuration for GetBehorighetsprofil
 type GetBehorighetsprofilerReq struct {
-	UID string `validate:"required,uuid"`
+	UID string `validate:"required"`
 }
 
 // GetBehorighetsprofil return structure of rights for uid
 func (s *kataloginformationService) GetBehorighetsprofil(ctx context.Context, req *GetBehorighetsprofilerReq) (*ladoktypes.KataloginformationBehorighetsprofil, *http.Response, error) {
+	if err := Check(req); err != nil {
+		return nil, nil, err
+	}
+
 	url := fmt.Sprintf("%s/%s/%s", s.service, "behorighetsprofil", req.UID)
 	reply := &ladoktypes.KataloginformationBehorighetsprofil{}
 	resp, err := s.client.call(ctx, s.acceptHeader(), http.MethodGet, url, nil, reply)

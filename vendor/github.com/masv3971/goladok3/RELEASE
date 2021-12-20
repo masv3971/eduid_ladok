@@ -44,3 +44,11 @@ v0.0.60 : New place for proxy config.
 v0.0.61 : Add proxyHeader.
 v0.0.62 : TLS config.
 v0.0.63 : Remove unnecessary debugging related to proxy.
+v0.0.64 : Re-work on ladok permission checker. 
+v0.0.65 : Remove bool from permission checker since it's not needed.
+v0.0.66 : Add validate check on each request.
+v0.0.67 : Fixes to struct validate.
+v0.0.68 : Wrong UID used.
+v0.0.69 : Can't use validator like that.
+v0.0.70 : Change name in call for body and set nil for handlers.
+v0.0.71 : Add translation for ID (int64) to string for readability.

@@ -85,7 +85,7 @@ github.com/leodido/go-urn
 ## explicit; go 1.17
 github.com/masv3971/goeduidiam
 github.com/masv3971/goeduidiam/internal/sunetjwt
-# github.com/masv3971/goladok3 v0.0.63
+# github.com/masv3971/goladok3 v0.0.71
 ## explicit; go 1.17
 github.com/masv3971/goladok3
 github.com/masv3971/goladok3/ladokmocks
@@ -137,14 +137,14 @@ github.com/ugorji/go/codec
 ## explicit; go 1.14
 go.step.sm/crypto/internal/step
 go.step.sm/crypto/x509util
-# golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871
+# golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 ## explicit; go 1.17
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/scrypt
 golang.org/x/crypto/sha3
-# golang.org/x/sys v0.0.0-20211124211545-fe61309f8881
+# golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
 ## explicit; go 1.17
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader

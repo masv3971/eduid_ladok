@@ -20,9 +20,9 @@ func (s *studentinformationService) acceptHeader() string {
 
 // GetStudentReq config for GetStudent
 type GetStudentReq struct {
-	UID          string `validate:"required_without=Personnummer ExterntUID,uuid"`
-	ExterntUID   string `validate:"required_without=Personnummer UID, uuid"`
-	Personnummer string `validate:"required_without=UID ExterntUID"`
+	UID          string `validate:"required_without_all=Personnummer ExterntUID"`
+	ExterntUID   string `validate:"required_without_all=Personnummer UID"`
+	Personnummer string `validate:"required_without_all=UID ExterntUID"`
 }
 
 // GetStudent return student
@@ -47,10 +47,13 @@ func (s *studentinformationService) GetStudent(ctx context.Context, req *GetStud
 
 // GetAktivPaLarosateReq config for GetAktivPaLarosate
 type GetAktivPaLarosateReq struct {
-	UID string `validate:"required,uuid"`
+	UID string `validate:"required"`
 }
 
 func (s *studentinformationService) GetAktivPaLarosate(ctx context.Context, req *GetAktivPaLarosateReq) (*ladoktypes.AktivPaLarosate, *http.Response, error) {
+	if err := Check(req); err != nil {
+		return nil, nil, err
+	}
 	url := fmt.Sprintf("%s/%s/%s/%s", s.service, "student", req.UID, "aktivpalarosaten")
 	reply := &ladoktypes.AktivPaLarosate{}
 	resp, err := s.client.call(ctx, s.acceptHeader(), "GET", url, nil, reply)

@@ -13,9 +13,9 @@ var (
 	// ErrNoEnvFound if no valid environment is found in certificate (ou)
 	ErrNoEnvFound = &Errors{Internal: []ladoktypes.InternalError{{Msg: "No valid ladok-environment (OU) found in certificate"}}}
 	// ErrNotSufficientPermissions if not all provided permissions are met
-	ErrNotSufficientPermissions = &Errors{Internal: []ladoktypes.InternalError{{Msg: "No permissions found in ladok", Type: "Permission"}}}
+	ErrNotSufficientPermissions = &Errors{Internal: []ladoktypes.InternalError{{Msg: "No permissions found in ladok", Type: "Ladok permission"}}}
 	// ErrNoPermissionProvided when input Permission is empty
-	ErrNoPermissionProvided = &Errors{Internal: []ladoktypes.InternalError{{Msg: "No permissions provided", Type: "Permission"}}}
+	ErrNoPermissionProvided = &Errors{Internal: []ladoktypes.InternalError{{Msg: "No permissions provided", Type: "Ladok permission"}}}
 )
 
 // Errors is the bespoke error struct
