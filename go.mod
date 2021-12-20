@@ -16,8 +16,8 @@ require (
 	github.com/mgutz/logxi v0.0.0-20161027140823-aebf8a7d67ab
 	github.com/stretchr/testify v1.7.0
 	go.step.sm/crypto v0.13.0
-	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0
@@ -28,7 +28,7 @@ require (
 	github.com/go-redis/redismock/v8 v8.0.6
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/masv3971/goeduidiam v0.0.9
-	github.com/masv3971/goladok3 v0.0.63
+	github.com/masv3971/goladok3 v0.0.71
 )
 
 require (
