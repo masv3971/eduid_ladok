@@ -20,7 +20,7 @@ func (s *Service) middlewareLogger() gin.HandlerFunc {
 	log := s.logger.New("http")
 	return func(c *gin.Context) {
 		c.Next()
-		log.Debug("request", "status", c.Writer.Status(), "url", c.Request.URL.String(), "method", c.Request.Method)
+		log.Info("request", "status", c.Writer.Status(), "url", c.Request.URL.String(), "method", c.Request.Method)
 	}
 }
 
