@@ -53,3 +53,10 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 
 	return s, nil
 }
+
+// Close closes certificate
+func (s *CertificateService) Close(ctx context.Context) error {
+	s.logger.Info("Quit")
+	ctx.Done()
+	return nil
+}

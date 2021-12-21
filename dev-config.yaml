@@ -3,13 +3,13 @@ eduid:
   worker:
     common:
       debug: yes
-    ladokx:
+    ladok-x:
       api_server:
         host: :8080
     ladok:
       api_server:
         host: :8080
-      debug: true
+      production: true
       schools:
         kf: 
           saml_name: student.konstfack.se

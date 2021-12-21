@@ -38,7 +38,6 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 
 	if err := s.Ladok.CheckPermission(context.Background(), s.Service.config.Ladok.Permissions); err != nil {
 		s.logger.Warn("Ladok permission", err.Error())
-		//return nil, err
 	}
 
 	s.logger.Info("Started")
@@ -74,7 +73,7 @@ func (s *RestService) StatusLadok(ctx context.Context) *model.Status {
 
 // Close closes serice ladok rest
 func (s *RestService) Close(ctx context.Context) error {
-	s.logger.Warn("Quit")
+	s.logger.Info("Quit")
 	ctx.Done()
 	return nil
 }

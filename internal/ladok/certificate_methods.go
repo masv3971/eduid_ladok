@@ -1,7 +1,6 @@
 package ladok
 
 import (
-	"context"
 	"crypto/x509"
 	"eduid_ladok/pkg/model"
 	"encoding/pem"
@@ -92,11 +91,4 @@ func (s *CertificateService) isCertificateInvalid() bool {
 	}
 
 	return false
-}
-
-// Close closes certificate
-func (s *CertificateService) Close(ctx context.Context) error {
-	s.logger.Warn("Quit")
-	ctx.Done()
-	return nil
 }

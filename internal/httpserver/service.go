@@ -32,10 +32,11 @@ func New(config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service,
 		server: &http.Server{Addr: config.APIServer.Host},
 	}
 
-	if s.config.Debug {
-		gin.SetMode(gin.DebugMode)
-	} else {
+	switch s.config.Production {
+	case true:
 		gin.SetMode(gin.ReleaseMode)
+	case false:
+		gin.SetMode(gin.DebugMode)
 	}
 
 	apiValidator := validator.New()
@@ -96,6 +97,6 @@ func renderContent(c *gin.Context, code int, data interface{}) {
 
 // Close closing httpserver
 func (s *Service) Close(ctx context.Context) error {
-	s.logger.Warn("Quit")
+	s.logger.Info("Quit")
 	return nil
 }
