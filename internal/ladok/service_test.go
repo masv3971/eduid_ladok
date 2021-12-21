@@ -249,7 +249,7 @@ func mockService(t *testing.T, statusCode int, tempDir string) (*Service, *httpt
 
 	mockCertificate(t, 0, 1000, tempDir)
 
-	service, err := New(context.TODO(), cfg, &sync.WaitGroup{}, "testSchoolName", ladokToAggregateChan, logger.New("test"))
+	service, err := New(context.TODO(), cfg, &sync.WaitGroup{}, "testSchoolName", ladokToAggregateChan, logger.New("test", false))
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}

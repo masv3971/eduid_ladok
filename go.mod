@@ -29,6 +29,12 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/masv3971/goeduidiam v0.0.9
 	github.com/masv3971/goladok3 v0.0.71
+	github.com/sirupsen/logrus v1.8.1
+)
+
+require (
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 )
 
 require (
@@ -54,6 +60,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
+	go.uber.org/zap v1.19.1
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

@@ -30,13 +30,13 @@ func main() {
 		ladoks   = make(map[string]*ladok.Service)
 	)
 
-	log = logger.New("eduid_ladok")
-	mainLog = logger.New("main")
-
-	cfg, err := configuration.Parse(mainLog.New("config_parser"))
+	cfg, err := configuration.Parse(logger.NewSimple("Configuration"))
 	if err != nil {
 		panic(err)
 	}
+
+	mainLog = logger.New("main", cfg.Production)
+	log = logger.New("eduid_ladok", cfg.Production)
 
 	for schoolName := range cfg.Schools {
 		ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 1000)
@@ -84,6 +84,7 @@ func main() {
 			err := services[feedName][schoolName].Close(ctx)
 			if err != nil {
 				mainLog.Warn("feedName", feedName, "schoolName", schoolName, "error", err)
+				mainLog.Warn("feedName")
 			}
 		}
 	}

@@ -8,7 +8,7 @@ type Cfg struct {
 		Host string `yaml:"host" validate:"required"`
 	} `yaml:"api_server"`
 
-	Debug bool `yaml:"debug"`
+	Production bool `yaml:"production"`
 
 	Log struct {
 		Level string `yaml:"level"`
@@ -49,7 +49,7 @@ type Cfg struct {
 	} `yaml:"redis"`
 }
 
-// Config represent the config file structure
+// Config represent the complete config file structure
 type Config struct {
 	EduID struct {
 		Worker struct {

@@ -58,6 +58,6 @@ func (s *Service) Close(ctx context.Context) error {
 	ctx.Done()
 	s.wg.Done()
 
-	s.logger.Warn("Quit")
+	s.logger.Info("Quit")
 	return nil
 }

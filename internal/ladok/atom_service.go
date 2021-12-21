@@ -68,7 +68,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 			case <-ticker.C:
 				s.run(ctx)
 			case <-s.quitRunChan:
-				s.logger.Warn("run stopped")
+				s.logger.Info("Consumer stopped")
 				ticker.Stop()
 				return
 			}
@@ -103,8 +103,8 @@ func (s *AtomService) StatusRedis(ctx context.Context) *model.Status {
 
 // Close closes ladok atom service
 func (s *AtomService) Close(ctx context.Context) error {
-	s.logger.Warn("Quit")
 	s.quitRunChan <- true
 	ctx.Done()
+	s.logger.Info("Quit")
 	return nil
 }
