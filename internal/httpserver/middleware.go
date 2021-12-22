@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (s *Service) middlewareDuration() gin.HandlerFunc {
@@ -16,11 +17,19 @@ func (s *Service) middlewareDuration() gin.HandlerFunc {
 	}
 }
 
+func (s *Service) middlewareTraceID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("sunet-request-id", uuid.NewString())
+		c.Header("sunet-request-id", c.GetString("sunet-request-id"))
+		c.Next()
+	}
+}
+
 func (s *Service) middlewareLogger() gin.HandlerFunc {
 	log := s.logger.New("http")
 	return func(c *gin.Context) {
 		c.Next()
-		log.Info("request", "status", c.Writer.Status(), "url", c.Request.URL.String(), "method", c.Request.Method)
+		log.Info("request", "status", c.Writer.Status(), "url", c.Request.URL.String(), "method", c.Request.Method, "sunet-request-id", c.GetString("sunet-request-id"))
 	}
 }
 

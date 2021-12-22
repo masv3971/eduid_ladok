@@ -9,7 +9,7 @@ eduid:
     ladok:
       api_server:
         host: :8080
-      production: true
+      production: false
       schools:
         kf: 
           saml_name: student.konstfack.se
