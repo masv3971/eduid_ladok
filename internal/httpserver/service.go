@@ -54,7 +54,7 @@ func New(config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service,
 	s.gin.Use(s.middlewareDuration())
 	s.gin.Use(s.middlewareLogger())
 	s.gin.Use(s.middlewareCrash())
-	s.gin.Use(s.middlewareProbes())
+	//s.gin.Use(s.middlewareProbes())
 	s.gin.NoRoute(func(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "not a valid endpoint", "data": nil})
 	})

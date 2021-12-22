@@ -38,12 +38,12 @@ func (s *Service) middlewareCrash() gin.HandlerFunc {
 	}
 }
 
-func (s *Service) middlewareProbes() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if c.Request.URL.Path == "/_internal/ready" || c.Request.URL.Path == "/_internal/live" {
-			c.AbortWithStatus(200)
-			return
-		}
-		c.Next()
-	}
-}
+//func (s *Service) middlewareProbes() gin.HandlerFunc {
+//	return func(c *gin.Context) {
+//		if c.Request.URL.Path == "/_internal/ready" || c.Request.URL.Path == "/_internal/live" {
+//			c.AbortWithStatus(200)
+//			return
+//		}
+//		c.Next()
+//	}
+//}
