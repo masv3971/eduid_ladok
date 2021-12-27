@@ -13,6 +13,8 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"github.com/google/uuid"
 )
 
 type service interface {
@@ -21,7 +23,7 @@ type service interface {
 
 func main() {
 	wg := &sync.WaitGroup{}
-	ctx := context.Background()
+	ctx := context.WithValue(context.Background(), model.ContextKey("sunet-request-id"), uuid.NewString())
 
 	var (
 		log      *logger.Logger
@@ -64,7 +66,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	httpserver, err := httpserver.New(cfg, apiv1, log.New("httpserver"))
+	httpserver, err := httpserver.New(ctx, cfg, apiv1, log.New("httpserver"))
 	s["httpserver"] = httpserver
 	if err != nil {
 		panic(err)

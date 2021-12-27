@@ -40,7 +40,6 @@ func (l *Logger) New(path string) *Logger {
 
 // Warn log
 func (l *Logger) Warn(msg string, args ...interface{}) {
-	//l.Logger.Warn(msg)
 	l.Logger.Sugar().Warnw(msg, args...)
 }
 

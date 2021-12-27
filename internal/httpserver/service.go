@@ -24,7 +24,7 @@ type Service struct {
 }
 
 // New creates a new httpserver service
-func New(config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service, error) {
 	s := &Service{
 		config: config,
 		logger: logger,
@@ -51,18 +51,20 @@ func New(config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service,
 	s.server.IdleTimeout = time.Second * 90
 
 	// Middlewares
-	s.gin.Use(s.middlewareDuration())
-	s.gin.Use(s.middlewareTraceID())
-	s.gin.Use(s.middlewareLogger())
-	s.gin.Use(s.middlewareCrash())
+	s.gin.Use(s.middlewareTraceID(ctx))
+	s.gin.Use(s.middlewareDuration(ctx))
+	s.gin.Use(s.middlewareLogger(ctx))
+	s.gin.Use(s.middlewareCrash(ctx))
 	s.gin.NoRoute(func(c *gin.Context) {
-		c.JSON(500, gin.H{"error": "not a valid endpoint", "data": nil})
+		status := http.StatusNotFound
+		p := helpers.Problem404()
+		c.JSON(status, gin.H{"error": p, "data": nil})
 	})
 
-	s.regEndpoint("api/v1/:schoolName/ladokinfo", "POST", s.endpointLadokInfo)
-	s.regEndpoint("api/v1/schoolinfo", "GET", s.endpointSchoolInfo)
+	s.regEndpoint(ctx, "api/v1/:schoolName/ladokinfo", "POST", s.endpointLadokInfo)
+	s.regEndpoint(ctx, "api/v1/schoolinfo", "GET", s.endpointSchoolInfo)
 
-	s.regEndpoint("/health", "GET", s.endpointStatus)
+	s.regEndpoint(ctx, "/health", "GET", s.endpointStatus)
 
 	// Run http server
 	go func() {
@@ -77,10 +79,15 @@ func New(config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service,
 	return s, nil
 }
 
-func (s *Service) regEndpoint(path, method string, handler func(*gin.Context) (interface{}, error)) {
+func (s *Service) regEndpoint(ctx context.Context, path, method string, handler func(context.Context, *gin.Context) (interface{}, error)) {
 	s.gin.Handle(method, path, func(c *gin.Context) {
-		res, err := handler(c)
-		renderContent(c, 200, gin.H{"data": res, "error": helpers.NewErrorFromError(err)})
+		res, err := handler(ctx, c)
+		status := 200
+
+		if err != nil {
+			status = 400
+		}
+		renderContent(c, status, gin.H{"data": res, "error": helpers.NewErrorFromError(err)})
 	})
 }
 
