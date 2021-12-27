@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"eduid_ladok/pkg/helpers"
 	"time"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) middlewareDuration() gin.HandlerFunc {
+func (s *Service) middlewareDuration(ctx context.Context) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t := time.Now()
 		c.Next()
@@ -17,7 +18,7 @@ func (s *Service) middlewareDuration() gin.HandlerFunc {
 	}
 }
 
-func (s *Service) middlewareTraceID() gin.HandlerFunc {
+func (s *Service) middlewareTraceID(ctx context.Context) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("sunet-request-id", uuid.NewString())
 		c.Header("sunet-request-id", c.GetString("sunet-request-id"))
@@ -25,7 +26,7 @@ func (s *Service) middlewareTraceID() gin.HandlerFunc {
 	}
 }
 
-func (s *Service) middlewareLogger() gin.HandlerFunc {
+func (s *Service) middlewareLogger(ctx context.Context) gin.HandlerFunc {
 	log := s.logger.New("http")
 	return func(c *gin.Context) {
 		c.Next()
@@ -33,7 +34,7 @@ func (s *Service) middlewareLogger() gin.HandlerFunc {
 	}
 }
 
-func (s *Service) middlewareCrash() gin.HandlerFunc {
+func (s *Service) middlewareCrash(ctx context.Context) gin.HandlerFunc {
 	log := s.logger.New("http")
 	return func(c *gin.Context) {
 		defer func() {

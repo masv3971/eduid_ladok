@@ -2,16 +2,15 @@ package helpers
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/go-playground/validator"
+	"github.com/moogar0880/problems"
 )
 
 type Error struct {
-	ID      string      `json:"id" xml:"id"`
+	Title   string      `json:"title" `
 	Details interface{} `json:"details" xml:"details"`
 }
 
@@ -20,17 +19,17 @@ func (e *Error) Error() string {
 		return ""
 	}
 	if e.Details == nil {
-		return fmt.Sprintf("Error: [%s]", e.ID)
+		return fmt.Sprintf("Error: [%s]", e.Title)
 	}
-	return fmt.Sprintf("Error: [%s] %+v", e.ID, e.Details)
+	return fmt.Sprintf("Error: [%s] %+v", e.Title, e.Details)
 }
 
 func NewError(id string) *Error {
-	return &Error{ID: id}
+	return &Error{Title: id}
 }
 
 func NewErrorDetails(id string, details interface{}) *Error {
-	return &Error{ID: id, Details: details}
+	return &Error{Title: id, Details: details}
 }
 
 func NewErrorFromError(err error) *Error {
@@ -42,21 +41,14 @@ func NewErrorFromError(err error) *Error {
 	}
 	jsonUnmarshalTypeError, ok := err.(*json.UnmarshalTypeError)
 	if ok {
-		return &Error{ID: "json_type_error", Details: formatJSONUnmarshalTypeError(jsonUnmarshalTypeError)}
+		return &Error{Title: "json_type_error", Details: formatJSONUnmarshalTypeError(jsonUnmarshalTypeError)}
 	}
 	jsonSyntaxError, ok := err.(*json.SyntaxError)
 	if ok {
-		return &Error{ID: "json_syntax_error", Details: map[string]interface{}{"position": jsonSyntaxError.Offset, "error": jsonSyntaxError.Error()}}
-	}
-	xmlSyntaxError, ok := err.(*xml.SyntaxError)
-	if ok {
-		return &Error{ID: "xml_syntax_error", Details: map[string]interface{}{"line": xmlSyntaxError.Line, "error": xmlSyntaxError.Msg}}
-	}
-	if err == io.ErrUnexpectedEOF {
-		return &Error{ID: "invalid_indata", Details: "Input too short"}
+		return &Error{Title: "json_syntax_error", Details: map[string]interface{}{"position": jsonSyntaxError.Offset, "error": jsonSyntaxError.Error()}}
 	}
 	if validatorErr, ok := err.(validator.ValidationErrors); ok {
-		return &Error{ID: "validation_error", Details: formatValidationErrors(validatorErr)}
+		return &Error{Title: "validation_error", Details: formatValidationErrors(validatorErr)}
 	}
 	return NewErrorDetails("internal_server_error", err.Error())
 }
@@ -85,4 +77,11 @@ func formatJSONUnmarshalTypeError(err *json.UnmarshalTypeError) []map[string]int
 			"actual":   err.Value,
 		},
 	}
+}
+
+func Problem404() *problems.DefaultProblem {
+	notFound := problems.NewDetailedProblem(404, "Not a valid endpoint")
+	problems.ValidateProblem(notFound)
+
+	return notFound
 }

@@ -24,13 +24,13 @@ type ReplyLadokInfo struct {
 }
 
 // LadokInfo handler
-func (c *Client) LadokInfo(indata *RequestLadokInfo) (*ReplyLadokInfo, error) {
+func (c *Client) LadokInfo(ctx context.Context, indata *RequestLadokInfo) (*ReplyLadokInfo, error) {
 	ladok, ok := c.ladoks[indata.SchoolName]
 	if !ok {
 		return nil, errors.New("Error, can't find any matching ladok instance")
 	}
 
-	reply, _, err := ladok.Rest.Ladok.Studentinformation.GetStudent(context.TODO(), &goladok3.GetStudentReq{
+	reply, _, err := ladok.Rest.Ladok.Studentinformation.GetStudent(ctx, &goladok3.GetStudentReq{
 		Personnummer: indata.Data.NIN,
 	})
 	if err != nil {
@@ -55,7 +55,7 @@ type ReplySchoolInfo struct {
 }
 
 // SchoolInfo return a list of schoolNames
-func (c *Client) SchoolInfo(indata *RequestSchoolInfo) (*ReplySchoolInfo, error) {
+func (c *Client) SchoolInfo(ctx context.Context, indata *RequestSchoolInfo) (*ReplySchoolInfo, error) {
 	replySchoolNames := &ReplySchoolInfo{}
 	sn := make(map[string]model.SchoolInfo)
 
@@ -70,8 +70,7 @@ func (c *Client) SchoolInfo(indata *RequestSchoolInfo) (*ReplySchoolInfo, error)
 }
 
 // Status return status for each ladok instance
-func (c *Client) Status() (*model.Status, error) {
-	ctx := context.Background()
+func (c *Client) Status(ctx context.Context) (*model.Status, error) {
 	manyStatus := model.ManyStatus{}
 
 	for _, ladok := range c.ladoks {
