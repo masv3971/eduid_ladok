@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/elimity-com/scim v0.0.0-20211119105057-007f1a2691f0
 	github.com/gin-gonic/gin v1.7.7
-	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0
