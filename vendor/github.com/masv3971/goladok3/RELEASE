@@ -52,3 +52,7 @@ v0.0.68 : Wrong UID used.
 v0.0.69 : Can't use validator like that.
 v0.0.70 : Change name in call for body and set nil for handlers.
 v0.0.71 : Add translation for ID (int64) to string for readability.
+v0.0.72 : Add tracing to all endpoints.
+v0.0.73 : bumptag
+v0.0.74 : bumptag
+v0.0.75 : Add some more tracing to other methods as well.

@@ -1,6 +1,7 @@
 package ladok
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -51,7 +52,7 @@ func TestImportCertificate(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := service.Certificate.importCertificate(); err != nil {
+			if err := service.Certificate.importCertificate(context.TODO()); err != nil {
 				assert.EqualError(t, err, tt.want.Error())
 			}
 
@@ -94,7 +95,7 @@ func TestCheckValidTime(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			service, _, _ := mockService(t, 200, t.TempDir())
 
-			gotStatus, _ := service.Certificate.CheckValidTime()
+			gotStatus, _ := service.Certificate.CheckValidTime(context.TODO())
 
 			t.Logf("name: %q", tt.name)
 			assert.Equal(t, tt.want, gotStatus, "status should be equal")
@@ -148,7 +149,7 @@ func TestIsCertificateInvalid(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			service, _, _ := mockService(t, 200, t.TempDir())
-			got := service.Certificate.isCertificateInvalid()
+			got := service.Certificate.isCertificateInvalid(context.TODO())
 
 			assert.Equal(t, tt.want, got)
 		})

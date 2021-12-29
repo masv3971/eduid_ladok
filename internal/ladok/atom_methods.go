@@ -9,9 +9,15 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/masv3971/goladok3"
 	"github.com/masv3971/goladok3/ladoktypes"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 func (s *AtomService) run(ctx context.Context) {
+	ctx, span := s.tp.Start(ctx, "atom.run")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	superFeed, _, err := s.ladok.Feed.Recent(ctx)
 	if err != nil {
 		s.logger.Warn("recent", err)
@@ -49,9 +55,13 @@ func (s *AtomService) run(ctx context.Context) {
 }
 
 func (s *AtomService) process(ctx context.Context, superFeed *ladoktypes.SuperFeed) {
+	ctx, span := s.tp.Start(ctx, "atom.process")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	for _, superEvent := range superFeed.SuperEvents {
 		if superEvent.EventTypeName == ladoktypes.LokalStudentEventName {
-			s.logger.Info("Adding message to queue", fmt.Sprintf("%d:%s", superFeed.ID, superEvent.EntryID))
+			s.logger.Info("Adding message to queue", "id", fmt.Sprintf("%d:%s", superFeed.ID, superEvent.EntryID))
 			channelEvent := model.LadokToAggregateMSG{
 				Event: superEvent,
 				TS:    time.Now(),
@@ -65,6 +75,10 @@ func (s *AtomService) process(ctx context.Context, superFeed *ladoktypes.SuperFe
 }
 
 func (s *AtomService) latestID(ctx context.Context) (int, error) {
+	ctx, span := s.tp.Start(ctx, "atom.latestID")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	id, err := s.db.HGet(ctx, s.Service.schoolName, "latest").Int()
 	if err == redis.Nil {
 		return 0, nil
@@ -73,6 +87,10 @@ func (s *AtomService) latestID(ctx context.Context) (int, error) {
 }
 
 func (s *AtomService) unprocessedIDs(ctx context.Context, currentID int) ([]int, error) {
+	ctx, span := s.tp.Start(ctx, "atom.unprocessedIDs")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	latestID, err := s.latestID(ctx)
 	if err != nil {
 		return nil, err
@@ -100,10 +118,14 @@ func (s *AtomService) unprocessedIDs(ctx context.Context, currentID int) ([]int,
 }
 
 func (s *AtomService) addToCache(ctx context.Context, id int) error {
+	ctx, span := otel.Tracer("atom").Start(ctx, "atom.addToCache")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	if err := s.db.HSet(ctx, s.Service.schoolName, "latest", id).Err(); err != nil {
 		return err
 	}
-	s.logger.Info("Adding feed id to cache", id)
+	s.logger.Info("Adding feed id to cache", "id", id)
 
 	return nil
 }

@@ -1,6 +1,7 @@
 package ladok
 
 import (
+	"context"
 	"crypto/x509"
 	"eduid_ladok/pkg/model"
 	"encoding/pem"
@@ -10,11 +11,17 @@ import (
 	"path/filepath"
 	"time"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.step.sm/crypto/x509util"
 )
 
 // importCertificate read crt, key and pem file and put it the certificate handler.
-func (s *CertificateService) importCertificate() error {
+func (s *CertificateService) importCertificate(ctx context.Context) error {
+	ctx, span := s.tp.Start(ctx, "certificate.importCertificate")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	var (
 		certPath = filepath.Join(s.Service.config.Ladok.Certificate.Folder, fmt.Sprintf("%s.%s", s.Service.schoolName, "crt"))
 		keyPath  = filepath.Join(s.Service.config.Ladok.Certificate.Folder, fmt.Sprintf("%s.%s", s.Service.schoolName, "key"))
@@ -53,7 +60,7 @@ func (s *CertificateService) importCertificate() error {
 		return err
 	}
 
-	if s.isCertificateInvalid() {
+	if s.isCertificateInvalid(ctx) {
 		return model.ErrCertificateNotValid
 	}
 
@@ -68,7 +75,9 @@ var (
 )
 
 // CheckValidTime keeps track of time left on certificate, return status
-func (s *CertificateService) CheckValidTime() (string, time.Time) {
+func (s *CertificateService) CheckValidTime(ctx context.Context) (string, time.Time) {
+	_, span := s.tp.Start(ctx, "certificate.CheckValidTime")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
 	days90 := time.Now().AddDate(0, 0, 90)
 	if s.Cert.NotAfter.Before(days90) {
 		return Cert90DaysWarning, s.Cert.NotAfter
@@ -78,9 +87,18 @@ func (s *CertificateService) CheckValidTime() (string, time.Time) {
 }
 
 // NewSHA256Fingerprint return fingerprint from a *x509.Certificate certificate
-func (s *CertificateService) NewSHA256Fingerprint() string { return x509util.Fingerprint(s.Cert) }
+func (s *CertificateService) NewSHA256Fingerprint(ctx context.Context) string {
+	_, span := otel.Tracer("certificate").Start(ctx, "certificate.NewSHA256Fingerprint")
+	defer span.End()
 
-func (s *CertificateService) isCertificateInvalid() bool {
+	return x509util.Fingerprint(s.Cert)
+}
+
+func (s *CertificateService) isCertificateInvalid(ctx context.Context) bool {
+	_, span := s.tp.Start(ctx, "certificate.isCertificateInvalid")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	NAfterA := time.Now().After(s.Cert.NotAfter)
 	NBeforeB := time.Now().Before(s.Cert.NotBefore)
 	BAfterA := s.Cert.NotBefore.After(s.Cert.NotAfter)

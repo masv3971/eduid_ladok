@@ -25,6 +25,9 @@ type ReplyLadokInfo struct {
 
 // LadokInfo handler
 func (c *Client) LadokInfo(ctx context.Context, indata *RequestLadokInfo) (*ReplyLadokInfo, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1.LadokInfo")
+	defer span.End()
+
 	ladok, ok := c.ladoks[indata.SchoolName]
 	if !ok {
 		return nil, errors.New("Error, can't find any matching ladok instance")
@@ -38,7 +41,7 @@ func (c *Client) LadokInfo(ctx context.Context, indata *RequestLadokInfo) (*Repl
 	}
 
 	replyLadokInfo := &ReplyLadokInfo{
-		ESI:             ESI(reply.ExterntUID),
+		ESI:             c.ESI(ctx, reply.ExterntUID),
 		LadokExterntUID: reply.ExterntUID,
 		IsStudent:       false,
 		ExpireStudent:   time.Time{},
@@ -56,6 +59,9 @@ type ReplySchoolInfo struct {
 
 // SchoolInfo return a list of schoolNames
 func (c *Client) SchoolInfo(ctx context.Context, indata *RequestSchoolInfo) (*ReplySchoolInfo, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1.SchoolInfo")
+	defer span.End()
+
 	replySchoolNames := &ReplySchoolInfo{}
 	sn := make(map[string]model.SchoolInfo)
 
@@ -71,6 +77,9 @@ func (c *Client) SchoolInfo(ctx context.Context, indata *RequestSchoolInfo) (*Re
 
 // Status return status for each ladok instance
 func (c *Client) Status(ctx context.Context) (*model.Status, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1.Status")
+	defer span.End()
+
 	manyStatus := model.ManyStatus{}
 
 	for _, ladok := range c.ladoks {

@@ -27,6 +27,9 @@ type GetStudentReq struct {
 
 // GetStudent return student
 func (s *studentinformationService) GetStudent(ctx context.Context, req *GetStudentReq) (*ladoktypes.Student, *http.Response, error) {
+	ctx, span := s.client.tp.Start(ctx, "goladok3.studentinformation.GetStudent")
+	defer span.End()
+
 	reply := &ladoktypes.Student{}
 	var url string
 
@@ -51,6 +54,9 @@ type GetAktivPaLarosateReq struct {
 }
 
 func (s *studentinformationService) GetAktivPaLarosate(ctx context.Context, req *GetAktivPaLarosateReq) (*ladoktypes.AktivPaLarosate, *http.Response, error) {
+	ctx, span := s.client.tp.Start(ctx, "goladok3.studentinformation.GetAktivPaLarosate")
+	defer span.End()
+
 	if err := Check(req); err != nil {
 		return nil, nil, err
 	}
