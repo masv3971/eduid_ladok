@@ -16,6 +16,9 @@ import (
 
 	"github.com/masv3971/goladok3/ladoktypes"
 	"golang.org/x/time/rate"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Config configures new function
@@ -41,6 +44,7 @@ type Client struct {
 	privateKey     *rsa.PrivateKey
 	privateKeyPEM  []byte
 	proxyURL       string
+	tp             trace.Tracer
 
 	Kataloginformation *kataloginformationService
 	Studentinformation *studentinformationService
@@ -62,6 +66,7 @@ func New(config Config) (*Client, error) {
 		certificate:    config.Certificate,
 		privateKey:     config.PrivateKey,
 		rateLimit:      rate.NewLimiter(rate.Every(1*time.Second), 30),
+		tp:             otel.Tracer("goladok3"),
 	}
 
 	if err := c.httpConfigure(); err != nil {
@@ -149,6 +154,9 @@ var ladokAcceptHeader = map[string]map[string]string{
 
 // NewRequest make a new request
 func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, path string, body interface{}) (*http.Request, error) {
+	ctx, span := c.tp.Start(ctx, "goladok3.newRequest")
+	defer span.End()
+
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, oneError("", "url", "newRequest", err.Error())
@@ -189,8 +197,10 @@ func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, pa
 }
 
 // Do does the new request
-func (c *Client) do(req *http.Request, value interface{}) (*http.Response, error) {
-	ctx := context.Background()
+func (c *Client) do(ctx context.Context, req *http.Request, value interface{}) (*http.Response, error) {
+	ctx, span := c.tp.Start(ctx, "goladok3.do")
+	defer span.End()
+
 	if err := c.rateLimit.Wait(ctx); err != nil {
 		return nil, oneError("", "HTTPClient.Do", "ratelimit", err.Error())
 	}
@@ -240,6 +250,9 @@ func checkResponse(r *http.Response) error {
 }
 
 func (c *Client) call(ctx context.Context, acceptHeader, method, url string, body, reply interface{}) (*http.Response, error) {
+	ctx, span := c.tp.Start(ctx, "goladok3.call")
+	defer span.End()
+
 	request, err := c.newRequest(
 		ctx,
 		acceptHeader,
@@ -251,7 +264,7 @@ func (c *Client) call(ctx context.Context, acceptHeader, method, url string, bod
 		return nil, err
 	}
 
-	resp, err := c.do(request, reply)
+	resp, err := c.do(ctx, request, reply)
 	if err != nil {
 		return resp, err
 	}

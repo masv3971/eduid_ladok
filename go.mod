@@ -25,12 +25,19 @@ require (
 	github.com/go-redis/redismock/v8 v8.0.6
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/masv3971/goeduidiam v0.0.9
-	github.com/masv3971/goladok3 v0.0.71
+	github.com/masv3971/goladok3 v0.0.75
+	go.opentelemetry.io/otel v1.3.0
+	go.opentelemetry.io/otel/exporters/jaeger v1.3.0
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.3.0
+	go.opentelemetry.io/otel/sdk v1.3.0
+	go.opentelemetry.io/otel/trace v1.3.0
 )
 
 require (
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	github.com/go-logr/logr v1.2.2 // indirect
+	github.com/go-logr/stdr v1.2.2 // indirect; ind
+	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/multierr v1.7.0 // indirect
 )
 
 require (

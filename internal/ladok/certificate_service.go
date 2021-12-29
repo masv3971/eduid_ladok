@@ -7,6 +7,10 @@ import (
 	"eduid_ladok/pkg/logger"
 	"fmt"
 	"time"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // CertificateService holds the certificate object
@@ -21,6 +25,7 @@ type CertificateService struct {
 	SHA256Fingerprint string
 	Chain             []*x509.Certificate
 	Pkcs12            []byte
+	tp                trace.Tracer
 }
 
 // NewCertificateService creates a new instance of certificate
@@ -28,19 +33,25 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 	s := &CertificateService{
 		logger:  logger,
 		Service: service,
+		tp:      otel.Tracer("Certificate"),
 	}
-	if err := s.importCertificate(); err != nil {
+
+	ctx, span := otel.Tracer("certificate").Start(ctx, "NewCertificateService")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
+	if err := s.importCertificate(ctx); err != nil {
 		return nil, err
 	}
 
-	s.SHA256Fingerprint = s.NewSHA256Fingerprint()
+	s.SHA256Fingerprint = s.NewSHA256Fingerprint(ctx)
 
 	go func() {
 		for true {
 			msg := fmt.Sprintf("Certificate %q is initialized", s.SHA256Fingerprint)
 			s.logger.Info(msg)
 
-			status, notAfter := s.CheckValidTime()
+			status, notAfter := s.CheckValidTime(ctx)
 			if status == Cert90DaysWarning {
 				msg := fmt.Sprintf("Certificate %q expiration warning %q", s.SHA256Fingerprint, notAfter)
 				s.logger.Warn(msg)

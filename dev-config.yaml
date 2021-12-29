@@ -10,6 +10,9 @@ eduid:
       api_server:
         host: :8080
       production: false
+      tracing:
+        kind: jaeger
+        endpoint: "http://localhost:14268/api/traces"
       schools:
         kf: 
           saml_name: student.konstfack.se

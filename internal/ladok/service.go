@@ -6,6 +6,10 @@ import (
 	"eduid_ladok/pkg/model"
 
 	"sync"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Service holds service object for ladok
@@ -15,6 +19,7 @@ type Service struct {
 	logger     *logger.Logger
 	schoolName string
 	SchoolID   int
+	tp         trace.Tracer
 
 	Certificate *CertificateService
 	Atom        *AtomService
@@ -28,7 +33,12 @@ func New(ctx context.Context, config *model.Cfg, wg *sync.WaitGroup, schoolName 
 		logger:     logger,
 		schoolName: schoolName,
 		wg:         wg,
+		tp:         otel.Tracer("Ladok"),
 	}
+
+	ctx, span := s.tp.Start(ctx, "ladok.New")
+	span.SetAttributes(attribute.String("SchoolName", schoolName))
+	defer span.End()
 
 	var err error
 

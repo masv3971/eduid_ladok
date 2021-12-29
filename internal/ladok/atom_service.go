@@ -8,6 +8,9 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/masv3971/goladok3"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // AtomService holds the service object
@@ -18,6 +21,7 @@ type AtomService struct {
 	ladok       *goladok3.Client
 	db          *redis.Client
 	quitRunChan chan bool
+	tp          trace.Tracer
 }
 
 // NewAtomService create a new instance of ladok rest
@@ -27,7 +31,12 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		Service:     service,
 		logger:      logger,
 		quitRunChan: make(chan bool),
+		tp:          otel.Tracer("Atom"),
 	}
+
+	ctx, span := s.tp.Start(ctx, "NewAtomService")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
 
 	switch s.Service.config.Redis.Addr != "" {
 	case true:
@@ -44,7 +53,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 	}
 
 	// Non intrusive check if redis is reachable, this will not stop the program even if non contactable.
-	if status := s.StatusRedis(context.TODO()); !status.Healthy {
+	if status := s.StatusRedis(ctx); !status.Healthy {
 		s.logger.Error("Cant connect to redis")
 	}
 
@@ -81,6 +90,10 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 
 // StatusRedis return the status of redis
 func (s *AtomService) StatusRedis(ctx context.Context) *model.Status {
+	ctx, span := s.tp.Start(ctx, "atom.StatusRedis")
+	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
+	defer span.End()
+
 	ping := s.db.Ping(ctx).String()
 	status := &model.Status{
 		Name:       "redis",

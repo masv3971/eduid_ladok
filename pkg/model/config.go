@@ -10,6 +10,11 @@ type Cfg struct {
 
 	Production bool `yaml:"production"`
 
+	Tracing struct {
+		Kind     string `yaml:"kind" validate:"oneof=file jaeger"`
+		Endpoint string `yaml:"endpoint" validate:"required"`
+	} `yaml:"tracing"`
+
 	Log struct {
 		Level string `yaml:"level"`
 	} `yaml:"log"`
