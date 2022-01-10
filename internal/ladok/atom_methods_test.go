@@ -28,7 +28,7 @@ func TestAtomRun(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			service, server, redisMock := mockService(t, 200, t.TempDir())
+			service, server, redisMock, _ := mockService(t, 200, 0, 100, t.TempDir())
 			defer server.Close()
 			redisMock.ExpectHGet("testSchoolName", "latest").SetVal(strconv.Itoa(tt.latestID))
 			for _, key := range tt.keys {
@@ -61,7 +61,7 @@ func TestAddToCache(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			service, _, redisMock := mockService(t, 200, t.TempDir())
+			service, _, redisMock, _ := mockService(t, 200, 0, 100, t.TempDir())
 
 			redisMock.ExpectHSet("testSchoolName", "latest", tt.have).SetVal(int64(tt.have))
 			redisMock.ExpectHGet("testSchoolName", "latest").SetVal(strconv.Itoa(tt.have))
@@ -121,7 +121,7 @@ func TestUnprocessedIDs(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			service, _, redisMock := mockService(t, 200, t.TempDir())
+			service, _, redisMock, _ := mockService(t, 200, 0, 100, t.TempDir())
 			ctx := context.Background()
 
 			redisMock.ExpectHGet("testSchoolName", "latest").SetVal(strconv.Itoa(tt.latestID))
@@ -156,7 +156,7 @@ func TestLatestID(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			service, _, redisMock := mockService(t, 200, t.TempDir())
+			service, _, redisMock, _ := mockService(t, 200, 0, 100, t.TempDir())
 
 			redisMock.ExpectHGet("testSchoolName", "latest").SetVal(strconv.Itoa(tt.want))
 

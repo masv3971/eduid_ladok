@@ -2,6 +2,7 @@ package ladok
 
 import (
 	"context"
+	"eduid_ladok/pkg/model"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ import (
 )
 
 func mockCertificate(t *testing.T, notBefore, notAfter int, folder string) {
-	certPEM, _, privateKeyPEM, _ := ladokmocks.MockCertificateAndKey(t, ladoktypes.EnvIntTestAPI, 0, 100)
+	certPEM, _, privateKeyPEM, _ := ladokmocks.MockCertificateAndKey(t, ladoktypes.EnvIntTestAPI, notBefore, notAfter)
 
 	cryptoParts := map[string][]byte{
 		"crt": certPEM,
@@ -33,7 +34,7 @@ func mockCertificate(t *testing.T, notBefore, notAfter int, folder string) {
 
 func TestImportCertificate(t *testing.T) {
 	tempDir := t.TempDir()
-	service, _, _ := mockService(t, 200, tempDir)
+	service, _, _, _ := mockService(t, 200, 0, 100, tempDir)
 	type have struct {
 		notBefore, notAfter int
 		fileType            string
@@ -57,7 +58,6 @@ func TestImportCertificate(t *testing.T) {
 			}
 
 			assert.NotNil(t, service.Certificate.Cert)
-			assert.NotNil(t, service.Certificate.Chain)
 			assert.NotNil(t, service.Certificate.PrivateKey)
 
 		})
@@ -93,12 +93,11 @@ func TestCheckValidTime(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			service, _, _ := mockService(t, 200, t.TempDir())
+			service, _, _, _ := mockService(t, 200, tt.have.notBefore, tt.have.notAfter, t.TempDir())
 
-			gotStatus, _ := service.Certificate.CheckValidTime(context.TODO())
+			got, _ := service.Certificate.CheckValidTime(context.TODO())
 
-			t.Logf("name: %q", tt.name)
-			assert.Equal(t, tt.want, gotStatus, "status should be equal")
+			assert.Equal(t, tt.want, got, "status should be equal")
 		})
 	}
 }
@@ -107,10 +106,14 @@ func TestIsCertificateInvalid(t *testing.T) {
 	type have struct {
 		notBefore, notAfter int
 	}
+	type want struct {
+		b bool
+		e error
+	}
 	tts := []struct {
 		name string
 		have have
-		want bool
+		want want
 	}{
 		{
 			name: "Cert into the future, standard case",
@@ -118,7 +121,10 @@ func TestIsCertificateInvalid(t *testing.T) {
 				notBefore: 0,
 				notAfter:  2,
 			},
-			want: false,
+			want: want{
+				b: false,
+				e: nil,
+			},
 		},
 		{
 			name: "Cert into the future, standard case",
@@ -126,7 +132,10 @@ func TestIsCertificateInvalid(t *testing.T) {
 				notBefore: 0,
 				notAfter:  100,
 			},
-			want: false,
+			want: want{
+				b: false,
+				e: nil,
+			},
 		},
 		{
 			name: "Cert in the past, old cert",
@@ -134,7 +143,10 @@ func TestIsCertificateInvalid(t *testing.T) {
 				notBefore: -2,
 				notAfter:  -1,
 			},
-			want: true,
+			want: want{
+				b: true,
+				e: model.ErrCertificateNotValid,
+			},
 		},
 		{
 			name: "NotBefore is After NotAfter, wrong cert",
@@ -142,16 +154,30 @@ func TestIsCertificateInvalid(t *testing.T) {
 				notBefore: 2,
 				notAfter:  -2,
 			},
-			want: true,
+			want: want{
+				b: true,
+				e: model.ErrCertificateNotValid,
+			},
 		},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			service, _, _ := mockService(t, 200, t.TempDir())
-			got := service.Certificate.isCertificateInvalid(context.TODO())
+			service, _, _, err := mockService(t, 200, tt.have.notBefore, tt.have.notAfter, t.TempDir())
+			if tt.want.e != nil {
+				//Not possible to execute without a valid certificate
+				assert.Equal(t, tt.want.e, err)
+			} else {
+				if !assert.NoError(t, err) {
+					t.FailNow()
+				}
+				got := service.Certificate.isCertificateInvalid(context.TODO())
 
-			assert.Equal(t, tt.want, got)
+				assert.Equal(t, tt.want.b, got)
+				if !assert.Equal(t, tt.want.e, err) {
+					t.FailNow()
+				}
+			}
 		})
 	}
 }
