@@ -18,6 +18,9 @@ import (
 	"github.com/masv3971/goladok3/ladoktypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 )
 
 func mockGenericEndpointServer(t *testing.T, mux *http.ServeMux, contentType, method, url, param string, payload []byte, statusCode int) {
@@ -150,32 +153,32 @@ func mockLadokHTTPServer(t *testing.T, statusCode int) *httptest.Server {
 }
 
 func TestMockEndpoints(t *testing.T) {
-	service, server, _ := mockService(t, 200, t.TempDir())
+	service, server, _, _ := mockService(t, 200, 0, 100, t.TempDir())
 	defer server.Close()
 
 	tts := []struct {
-		name    string
-		want    interface{}
-		fn      interface{}
-		eventID int
+		name      string
+		want      interface{}
+		fn        interface{}
+		attribute interface{}
 	}{
 		{
-			name:    "/handelser/feed/recent",
-			want:    ladokmocks.MockSuperFeed(100),
-			eventID: 100,
-			fn:      service.Atom.ladok.Feed.Recent,
+			name:      "/handelser/feed/recent",
+			want:      ladokmocks.MockSuperFeed(100),
+			attribute: 100,
+			fn:        service.Atom.ladok.Feed.Recent,
 		},
 		{
-			name:    "/handelser/feed/50",
-			want:    ladokmocks.MockSuperFeed(50),
-			eventID: 50,
-			fn:      service.Atom.ladok.Feed.Historical,
+			name:      "/handelser/feed/50",
+			want:      ladokmocks.MockSuperFeed(50),
+			attribute: 50,
+			fn:        service.Atom.ladok.Feed.Historical,
 		},
 		{
-			name:    "/handelser/feed/first",
-			want:    ladokmocks.MockSuperFeed(1),
-			eventID: 1,
-			fn:      service.Atom.ladok.Feed.First,
+			name:      "/handelser/feed/first",
+			want:      ladokmocks.MockSuperFeed(1),
+			attribute: 1,
+			fn:        service.Atom.ladok.Feed.First,
 		},
 		{
 			name: "/kataloginformation/anvandare/autentiserad",
@@ -188,15 +191,16 @@ func TestMockEndpoints(t *testing.T) {
 			fn:   service.Rest.Ladok.Kataloginformation.GetAnvandarbehorighetEgna,
 		},
 		{
-			name: "/kataloginformation/behorighetsprofil",
-			want: ladokmocks.MockKataloginformationBehorighetsprofil(),
-			fn:   service.Rest.Ladok.Kataloginformation.GetBehorighetsprofil,
+			name:      "/kataloginformation/behorighetsprofil",
+			want:      ladokmocks.MockKataloginformationBehorighetsprofil(),
+			fn:        service.Rest.Ladok.Kataloginformation.GetBehorighetsprofil,
+			attribute: ladokmocks.BehorighetsprofilUID,
 		},
 		{
-			name:    "/studentinformation/student",
-			want:    ladokmocks.MockStudentinformationStudent(),
-			fn:      nil,
-			eventID: 0,
+			name:      "/studentinformation/student UID",
+			want:      ladokmocks.MockStudentinformationStudent(),
+			fn:        service.Rest.Ladok.Studentinformation.GetStudent,
+			attribute: ladokmocks.Students[0].StudentUID,
 		},
 	}
 
@@ -212,7 +216,14 @@ func TestMockEndpoints(t *testing.T) {
 				assert.Equal(t, tt.want, reply)
 			case func(context.Context, int) (*ladoktypes.SuperFeed, *http.Response, error):
 				f := tt.fn.(func(context.Context, int) (*ladoktypes.SuperFeed, *http.Response, error))
-				reply, _, err := f(context.TODO(), tt.eventID)
+				reply, _, err := f(context.TODO(), tt.attribute.(int))
+				if !assert.NoError(t, err) {
+					t.FailNow()
+				}
+				assert.Equal(t, tt.want, reply)
+			case func(context.Context, *goladok3.HistoricalReq) (*ladoktypes.SuperFeed, *http.Response, error):
+				f := tt.fn.(func(context.Context, *goladok3.HistoricalReq) (*ladoktypes.SuperFeed, *http.Response, error))
+				reply, _, err := f(context.TODO(), &goladok3.HistoricalReq{ID: tt.attribute.(int)})
 				if !assert.NoError(t, err) {
 					t.FailNow()
 				}
@@ -231,14 +242,29 @@ func TestMockEndpoints(t *testing.T) {
 					t.FailNow()
 				}
 				assert.Equal(t, tt.want, reply)
+			case func(context.Context, *goladok3.GetBehorighetsprofilerReq) (*ladoktypes.KataloginformationBehorighetsprofil, *http.Response, error):
+				f := tt.fn.(func(context.Context, *goladok3.GetBehorighetsprofilerReq) (*ladoktypes.KataloginformationBehorighetsprofil, *http.Response, error))
+				reply, _, err := f(context.TODO(), &goladok3.GetBehorighetsprofilerReq{UID: tt.attribute.(string)})
+				if !assert.NoError(t, err) {
+					t.FailNow()
+				}
+				assert.Equal(t, tt.want, reply)
+			case func(context.Context, *goladok3.GetStudentReq) (*ladoktypes.Student, *http.Response, error):
+				f := tt.fn.(func(context.Context, *goladok3.GetStudentReq) (*ladoktypes.Student, *http.Response, error))
+				reply, _, err := f(context.TODO(), &goladok3.GetStudentReq{UID: tt.attribute.(string)})
+				if !assert.NoError(t, err) {
+					t.FailNow()
+				}
+				assert.Equal(t, tt.want, reply)
 			default:
-				t.Error("ERROR: can't find a matching reflecting type")
+				t.Errorf("ERROR: can't find a matching reflecting type: %T", tt.fn)
+				t.FailNow()
 			}
 		})
 	}
 }
 
-func mockService(t *testing.T, statusCode int, tempDir string) (*Service, *httptest.Server, redismock.ClientMock) {
+func mockService(t *testing.T, statusCode, notBefore, notAfter int, tempDir string) (*Service, *httptest.Server, redismock.ClientMock, error) {
 	server := mockLadokHTTPServer(t, statusCode)
 
 	ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 200)
@@ -246,18 +272,22 @@ func mockService(t *testing.T, statusCode int, tempDir string) (*Service, *httpt
 	cfg := &model.Cfg{}
 	cfg.Ladok.Certificate.Folder = tempDir
 	cfg.Ladok.URL = server.URL
+	cfg.Ladok.Atom.Periodicity = 60
 
-	mockCertificate(t, 0, 1000, tempDir)
+	mockCertificate(t, notBefore, notAfter, tempDir)
+	testLog := logger.Logger{
+		Logger: *zaptest.NewLogger(t, zaptest.Level(zap.PanicLevel)),
+	}
 
-	service, err := New(context.TODO(), cfg, &sync.WaitGroup{}, "testSchoolName", ladokToAggregateChan, logger.New("test", false))
-	if !assert.NoError(t, err) {
-		t.FailNow()
+	service, err := New(context.TODO(), cfg, &sync.WaitGroup{}, "testSchoolName", ladokToAggregateChan, testLog.New("test"))
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
 	r, redisMock := redismock.NewClientMock()
 	service.Atom.db = r
 
-	return service, server, redisMock
+	return service, server, redisMock, nil
 }
 
 func testMethod(t *testing.T, r *http.Request, want string) {

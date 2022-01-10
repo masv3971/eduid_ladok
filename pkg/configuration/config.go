@@ -17,8 +17,8 @@ type envVars struct {
 
 // Parse parses config file from EDUID_CONFIG_YAML environment variable
 func Parse(logger *logger.Logger) (*model.Cfg, error) {
-	var env envVars
 	logger.Info("Read environmental variable")
+	var env envVars
 	if err := envconfig.Process("", &env); err != nil {
 		return nil, err
 	}

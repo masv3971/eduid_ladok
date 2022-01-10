@@ -10,7 +10,7 @@ import (
 
 func TestNewCertificateService(t *testing.T) {
 	tempDir := t.TempDir()
-	service, _, _ := mockService(t, 200, tempDir)
+	service, _, _, _ := mockService(t, 200, 0, 100, tempDir)
 
 	type have struct {
 		notAfter, notBefore int
