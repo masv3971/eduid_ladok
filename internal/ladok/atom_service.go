@@ -116,6 +116,9 @@ func (s *AtomService) StatusRedis(ctx context.Context) *model.Status {
 
 // Close closes ladok atom service
 func (s *AtomService) Close(ctx context.Context) error {
+	_, span := s.tp.Start(ctx, "atom.quit")
+	span.End()
+
 	s.quitRunChan <- true
 	ctx.Done()
 	s.logger.Info("Quit")

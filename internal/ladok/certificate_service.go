@@ -67,6 +67,9 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 
 // Close closes certificate
 func (s *CertificateService) Close(ctx context.Context) error {
+	_, span := s.tp.Start(ctx, "certificate.quit")
+	span.End()
+
 	s.logger.Info("Quit")
 	ctx.Done()
 	return nil

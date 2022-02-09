@@ -64,8 +64,12 @@ func New(ctx context.Context, config *model.Cfg, wg *sync.WaitGroup, schoolName 
 
 // Close closes ladok
 func (s *Service) Close(ctx context.Context) error {
+	ctx, span := s.tp.Start(ctx, "ladok.quit")
+	span.End()
+
 	s.Atom.Close(ctx)
 	s.Rest.Close(ctx)
 	s.Certificate.Close(ctx)
+
 	return nil
 }

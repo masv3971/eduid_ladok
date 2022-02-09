@@ -95,8 +95,6 @@ func main() {
 
 	mainLog.Info("HALTING SIGNAL!")
 
-	tp.Close(ctx)
-
 	for feedName, feeds := range services {
 		for schoolName := range feeds {
 			err := services[feedName][schoolName].Close(ctx)
@@ -106,6 +104,8 @@ func main() {
 			}
 		}
 	}
+
+	tp.Close(ctx)
 
 	wg.Wait() // Block here until are workers are done
 

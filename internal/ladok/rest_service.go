@@ -85,6 +85,9 @@ func (s *RestService) StatusLadok(ctx context.Context) *model.Status {
 
 // Close closes serice ladok rest
 func (s *RestService) Close(ctx context.Context) error {
+	_, span := s.tp.Start(ctx, "rest.quit")
+	span.End()
+
 	s.logger.Info("Quit")
 	ctx.Done()
 	return nil
