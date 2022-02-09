@@ -10,6 +10,7 @@ services:
     volumes:
       - eduid_ladok:/data
       - ./cert:/cert:ro
+      - ./dev-config.yaml:/dev-config.yaml:ro
     depends_on:
       - redis
     networks:
@@ -18,19 +19,7 @@ services:
     expose:
       - 8080
     environment:
-      - "LOGXI=*"
-      - "DEBUG=true"
-      - "HOST=:8080"
-      - "SCHOOL_NAMES=kf,lnu"
-      - "LADOK_URL=https://api.integrationstest.ladok.se"
-      - "EDUID_IAM_URL=https://api.dev.eduid.se/scim/test"
-      - "JWT_URL=https://auth-test.sunet.se"
-      - "REDIS_DB=3"
-      - "REDIS_ADDR=redis:6379,"
-      - "LADOK_ATOM_PERIODICITY=60"
-      - "LADOK_CERTIFICATE_FOLDER=cert"
-      - "KF_SAML_NAME=student.konstfack.se"
-      - "LNU_SAML_NAME=lnu.se"
+      - "EDUID_CONFIG_YAML=dev-config.yaml"
       - "HTTP_PROXY=haproxy:8080"
       #- "http_proxy=http://proxy.dev.eduid.se:8080"
       #- "HTTPS_PROXY=http://proxy.dev.eduid.se:8080"

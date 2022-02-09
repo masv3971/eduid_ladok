@@ -41,6 +41,11 @@ func (t *Trace) newJaegerExporter(url string) (tracesdk.SpanExporter, error) {
 }
 
 func (t *Trace) newResource() (*resource.Resource, error) {
+	env := "development"
+	if t.cfg.Production {
+		env = "production"
+	}
+
 	r, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
@@ -48,7 +53,7 @@ func (t *Trace) newResource() (*resource.Resource, error) {
 			semconv.ServiceNameKey.String("eduid_ladok"),
 			semconv.TelemetrySDKLanguageGo,
 			semconv.ServiceVersionKey.String("v0.1.0"),
-			attribute.String("environment", "demo"),
+			attribute.String("environment", env),
 		),
 	)
 	if err != nil {
@@ -58,6 +63,7 @@ func (t *Trace) newResource() (*resource.Resource, error) {
 	return r, nil
 }
 
+// Trace type
 type Trace struct {
 	logger *logger.Logger
 	cfg    *model.Cfg
@@ -65,6 +71,7 @@ type Trace struct {
 	fileHandler *os.File
 }
 
+// Close close trace
 func (t *Trace) Close(ctx context.Context) {
 	t.logger.Info("Quit")
 	if err := t.Shutdown(ctx); err != nil {
