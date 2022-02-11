@@ -8,7 +8,8 @@ type Cfg struct {
 		Host string `yaml:"host" validate:"required"`
 	} `yaml:"api_server"`
 
-	Production bool `yaml:"production"`
+	Production bool   `yaml:"production"`
+	HTTPProxy  string `yaml:"http_proxy"`
 
 	Tracing struct {
 		Kind     string `yaml:"kind" validate:"oneof=file jaeger disabled"`

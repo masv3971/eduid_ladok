@@ -10,6 +10,7 @@ eduid:
       api_server:
         host: :8080
       production: false
+      http_proxy: "some-proxy.se"
       tracing:
         kind: file
         #endpoint: "/tmp/trace.txt"
