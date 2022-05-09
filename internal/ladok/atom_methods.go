@@ -20,7 +20,7 @@ func (s *AtomService) run(ctx context.Context) {
 
 	superFeed, _, err := s.ladok.Feed.Recent(ctx)
 	if err != nil {
-		s.logger.Warn("recent", err)
+		s.logger.Warn("recent", "error", err)
 	}
 	if superFeed == nil {
 		s.logger.Warn("Feed return nil")
