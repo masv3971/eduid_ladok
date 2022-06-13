@@ -1,5 +1,4 @@
 /cert/*
-!/cert/Ladok3.Chain.CA.pem
 
 environment_vars.sh
 notes.txt
@@ -8,3 +7,4 @@ docker-compose.yaml
 Dockerfile
 pki/*.crt
 pki/*.key
+dev-config.yaml
