@@ -22,8 +22,11 @@ eduid:
           saml_name: student.konstfack.se
         lnu:
           saml_name: lnu.se 
+        hb:
+          saml_name: hb.se
       ladok:
-        url: https://api.integrationstest.ladok.se
+        #url: https://api.integrationstest.ladok.se
+        url: https://api.ladok.se
         certificate:
           folder: cert
         atom:

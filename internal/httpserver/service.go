@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/masv3971/goladok3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -88,18 +89,38 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 }
 
 func (s *Service) regEndpoint(ctx context.Context, path, method string, handler func(context.Context, *gin.Context) (interface{}, error)) {
+	//if s.config.Log.Level
 	ctx, span := s.tp.Start(ctx, "httpserver.reqEndpoint")
 	span.AddEvent(fmt.Sprintf("%s:%s", method, path))
 	defer span.End()
 
 	s.gin.Handle(method, path, func(c *gin.Context) {
 		res, err := handler(ctx, c)
-		status := 200
+
+		var (
+			status int = 200
+			errMsg interface{}
+		)
 
 		if err != nil {
-			status = 400
+			switch err.(type) {
+			case *goladok3.Errors:
+				if err.(*goladok3.Errors).Ladok != nil {
+					status = 400
+					errMsg = err.(*goladok3.Errors).Ladok
+				}
+				if err.(*goladok3.Errors).Internal != nil {
+					status = 400
+					errMsg = err.(*goladok3.Errors).Internal
+				}
+			case validator.ValidationErrors:
+				status = 400
+			default:
+				status = 400
+			}
 		}
-		renderContent(c, status, gin.H{"data": res, "error": helpers.NewErrorFromError(err)})
+
+		renderContent(c, status, gin.H{"data": res, "error": errMsg})
 	})
 }
 
