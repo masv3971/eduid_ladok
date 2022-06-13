@@ -8,3 +8,5 @@ Dockerfile
 pki/*.crt
 pki/*.key
 dev-config.yaml
+test-config.yaml
+redis-data/

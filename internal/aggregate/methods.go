@@ -6,14 +6,9 @@ import (
 
 	"github.com/masv3971/goladok3"
 	"github.com/masv3971/goladok3/ladoktypes"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 func (s *Service) run(ctx context.Context) {
-	ctx, span := s.tp.Start(ctx, "aggregate.run")
-	span.SetAttributes(attribute.String("SchoolName", s.feedName))
-	defer span.End()
-
 	s.logger.Info("start run")
 	for {
 		select {

@@ -18,10 +18,6 @@ import (
 
 // importCertificate read crt, key and pem file and put it the certificate handler.
 func (s *CertificateService) importCertificate(ctx context.Context) error {
-	ctx, span := s.tp.Start(ctx, "certificate.importCertificate")
-	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
-	defer span.End()
-
 	var (
 		certPath = filepath.Join(s.Service.config.Ladok.Certificate.Folder, fmt.Sprintf("%s.%s", s.Service.schoolName, "crt"))
 		keyPath  = filepath.Join(s.Service.config.Ladok.Certificate.Folder, fmt.Sprintf("%s.%s", s.Service.schoolName, "key"))
