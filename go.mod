@@ -26,9 +26,6 @@ require (
 	github.com/masv3971/goeduidiam v0.0.9
 	github.com/masv3971/goladok3 v0.0.75
 	go.opentelemetry.io/otel v1.7.0
-	go.opentelemetry.io/otel/exporters/jaeger v1.7.0
-	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.7.0
-	go.opentelemetry.io/otel/sdk v1.7.0
 	go.opentelemetry.io/otel/trace v1.7.0
 )
 
