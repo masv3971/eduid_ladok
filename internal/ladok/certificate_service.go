@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -33,12 +31,7 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 	s := &CertificateService{
 		logger:  logger,
 		Service: service,
-		tp:      otel.Tracer("Certificate"),
 	}
-
-	ctx, span := otel.Tracer("certificate").Start(ctx, "NewCertificateService")
-	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
-	defer span.End()
 
 	if err := s.importCertificate(ctx); err != nil {
 		return nil, err
@@ -67,9 +60,6 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 
 // Close closes certificate
 func (s *CertificateService) Close(ctx context.Context) error {
-	_, span := s.tp.Start(ctx, "certificate.quit")
-	span.End()
-
 	s.logger.Info("Quit")
 	ctx.Done()
 	return nil

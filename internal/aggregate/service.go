@@ -8,9 +8,6 @@ import (
 	"sync"
 
 	"github.com/masv3971/goeduidiam"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // Service holds the service object for aggregate
@@ -22,7 +19,6 @@ type Service struct {
 	eduidiam    *goeduidiam.Client
 	feedName    string
 	quitChannel chan bool
-	tp          trace.Tracer
 }
 
 // New creates a new instance of aggregate
@@ -34,7 +30,6 @@ func New(ctx context.Context, config *model.Cfg, wg *sync.WaitGroup, feedName st
 		wg:          wg,
 		feedName:    feedName,
 		quitChannel: make(chan bool),
-		tp:          otel.Tracer("Aggregate"),
 	}
 	s.eduidiam = goeduidiam.New(goeduidiam.Config{
 		URL: s.config.EduID.IAM.URL,
@@ -49,10 +44,6 @@ func New(ctx context.Context, config *model.Cfg, wg *sync.WaitGroup, feedName st
 			Client:      "",
 		},
 	})
-
-	ctx, span := s.tp.Start(ctx, "aggregate.New")
-	span.SetAttributes(attribute.String("SchoolName", feedName))
-	defer span.End()
 
 	s.wg.Add(1)
 	go s.run(ctx)

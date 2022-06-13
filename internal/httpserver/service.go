@@ -6,7 +6,6 @@ import (
 	"eduid_ladok/pkg/helpers"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/masv3971/goladok3"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -35,11 +33,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 		logger: logger,
 		apiv1:  api,
 		server: &http.Server{Addr: config.APIServer.Host},
-		tp:     otel.Tracer("HttpServer"),
 	}
-
-	ctx, span := s.tp.Start(ctx, "httpserver.New")
-	defer span.End()
 
 	switch s.config.Production {
 	case true:
@@ -89,11 +83,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 }
 
 func (s *Service) regEndpoint(ctx context.Context, path, method string, handler func(context.Context, *gin.Context) (interface{}, error)) {
-	//if s.config.Log.Level
-	ctx, span := s.tp.Start(ctx, "httpserver.reqEndpoint")
-	span.AddEvent(fmt.Sprintf("%s:%s", method, path))
-	defer span.End()
-
 	s.gin.Handle(method, path, func(c *gin.Context) {
 		res, err := handler(ctx, c)
 

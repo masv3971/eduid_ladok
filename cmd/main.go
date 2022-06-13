@@ -9,14 +9,10 @@ import (
 	"eduid_ladok/pkg/configuration"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
-	"eduid_ladok/pkg/tracer"
-	"fmt"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-
-	"go.opentelemetry.io/otel"
 )
 
 type service interface {
@@ -25,6 +21,7 @@ type service interface {
 
 func main() {
 	wg := &sync.WaitGroup{}
+	ctx := context.Background()
 
 	var (
 		log      *logger.Logger
@@ -40,17 +37,6 @@ func main() {
 
 	mainLog = logger.New("main", cfg.Production)
 	log = logger.New("eduid_ladok", cfg.Production)
-
-	tp, err := tracer.New(cfg, log.New("tracer"))
-	if err != nil {
-		panic(err)
-	}
-
-	otel.SetTracerProvider(tp)
-
-	// no defer span.End() since we need the span to close before main is does because main will wait until os.Signal 1 is sent.
-	ctx, span := otel.Tracer("main").Start(context.Background(), "main.main")
-	fmt.Println("context value", ctx.Value("transactionID"))
 
 	for schoolName := range cfg.Schools {
 		ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 1000)
@@ -85,8 +71,6 @@ func main() {
 	}
 	services["core"] = s
 
-	span.End()
-
 	// Handle sigterm and await termChan signal
 	termChan := make(chan os.Signal, 1)
 	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM)
@@ -104,8 +88,6 @@ func main() {
 			}
 		}
 	}
-
-	tp.Close(ctx)
 
 	wg.Wait() // Block here until are workers are done
 
