@@ -11,11 +11,6 @@ type Cfg struct {
 	Production bool   `yaml:"production"`
 	HTTPProxy  string `yaml:"http_proxy"`
 
-	Tracing struct {
-		Kind     string `yaml:"kind" validate:"oneof=file jaeger disabled"`
-		Endpoint string `yaml:"endpoint" validate:"required"`
-	} `yaml:"tracing"`
-
 	Log struct {
 		Level string `yaml:"level"`
 	} `yaml:"log"`

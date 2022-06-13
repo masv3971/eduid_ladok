@@ -7,8 +7,6 @@ import (
 	"eduid_ladok/pkg/logger"
 	"fmt"
 	"time"
-
-	"go.opentelemetry.io/otel/trace"
 )
 
 // CertificateService holds the certificate object
@@ -23,7 +21,6 @@ type CertificateService struct {
 	SHA256Fingerprint string
 	Chain             []*x509.Certificate
 	Pkcs12            []byte
-	tp                trace.Tracer
 }
 
 // NewCertificateService creates a new instance of certificate
