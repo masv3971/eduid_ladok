@@ -1,33 +1,32 @@
 # eduid_ladok
+
 Integration between eduid and ladok
 
 ## Prerequisites
-1. Create account in schools local IDP
-2. Ask Ladok to create a certificate for the above user
-    * The certificate needs to have at least the following permissions:
-    * 
 
+### build
 
-## Build and run in Docker-compose
-1. docker-compose build
-2. docker-compose up -d
-## Build outside Docker
-```
-# Linux
-$ make
+* make
+* docker
+* docker-compose
 
-# mac m1
-$ make mac_m1
-```
+### x509
 
-## Flow
-This is the general flow for each school using this.
+1. Request from school with permission:
+    * 11004:  kataloginformation.las
+    * 21008:  kataloginformationbehorighet.behorigheter.allt.las
+    * 21010:  kataloginformationbehorighet.anvandare.las
+    * 51001:  studiedeltagande.las
 
-```
-graph LR;
-    ladok -->|atom| eduid_ladok;
-    ladok -->|rest| eduid_ladok;
-    eduid_ladok -->|rest| ladok;
+## compile, run and stop
 
-    eduid_ladok --> |scim|EduID;
-```     
+### docker-compose
+
+* ```$ make container-build```
+* ```$ make container-start```
+* ```$ make container-stop```
+
+### Local (Linux)
+
+* ```$ make```
+* ```$ ./bin/eduid_ladok```
