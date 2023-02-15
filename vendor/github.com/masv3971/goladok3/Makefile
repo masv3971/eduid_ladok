@@ -2,8 +2,8 @@
 
 NAME 					:= goladok3
 TAGS					:= $(shell git tag)
-VERSION					:= $(shell tail -1 RELEASE|awk -F" : " '{print $$1}')
-COMMIT_MSG				:= $(shell tail -1 RELEASE|awk -F" : " '{print $$2}')
+VERSION					:= $(shell tail -1 RELEASE.txt|awk -F" : " '{print $$1}')
+COMMIT_MSG				:= $(shell tail -1 RELEASE.txt|awk -F" : " '{print $$2}')
 
 default: release-patch
 
@@ -21,7 +21,7 @@ test:
 git-status:
 	$(info files to be added:)
 	@git status
-	read -p "Press enter in order to precede"
+	$(read -p "Press enter in order to precede")
 
 add: git-status
 	git add .
@@ -57,8 +57,8 @@ go-list:
 check-files: check-release-file check-license-file check-readme-file
 
 check-release-file:
-ifeq (,$(wildcard ./RELEASE))
-	$(error RELEASE file does not exists, make it!)
+ifeq (,$(wildcard ./RELEASE.txt))
+	$(error RELEASE.txt file does not exists, make it!)
 endif
 
 check-license-file:

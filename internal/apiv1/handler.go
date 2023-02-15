@@ -25,7 +25,7 @@ type ReplyLadokInfo struct {
 
 // LadokInfo handler
 func (c *Client) LadokInfo(ctx context.Context, indata *RequestLadokInfo) (*ReplyLadokInfo, error) {
-	ladok, ok := c.ladoks[indata.SchoolName]
+	ladok, ok := c.ladokInstances[indata.SchoolName]
 	if !ok {
 		return nil, errors.New("Error, can't find any matching ladok instance")
 	}
@@ -73,7 +73,7 @@ func (c *Client) SchoolInfo(ctx context.Context, indata *RequestSchoolInfo) (*Re
 func (c *Client) Status(ctx context.Context) (*model.Status, error) {
 	manyStatus := model.ManyStatus{}
 
-	for _, ladok := range c.ladoks {
+	for _, ladok := range c.ladokInstances {
 		redis := ladok.Atom.StatusRedis(ctx)
 		ladok := ladok.Rest.StatusLadok(ctx)
 

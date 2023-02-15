@@ -12,8 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/masv3971/goladok3"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/masv3971/goladok3/ladoktypes"
 )
 
 // Service is the service object for httpserver
@@ -23,7 +22,6 @@ type Service struct {
 	server *http.Server
 	apiv1  Apiv1
 	gin    *gin.Engine
-	tp     trace.Tracer
 }
 
 // New creates a new httpserver service
@@ -88,20 +86,14 @@ func (s *Service) regEndpoint(ctx context.Context, path, method string, handler 
 
 		var (
 			status int = 200
-			errMsg interface{}
 		)
 
 		if err != nil {
 			switch err.(type) {
-			case *goladok3.Errors:
-				if err.(*goladok3.Errors).Ladok != nil {
-					status = 400
-					errMsg = err.(*goladok3.Errors).Ladok
-				}
-				if err.(*goladok3.Errors).Internal != nil {
-					status = 400
-					errMsg = err.(*goladok3.Errors).Internal
-				}
+			case *ladoktypes.LadokError:
+				status = 400
+			case ladoktypes.PermissionErrors:
+				status = 400
 			case validator.ValidationErrors:
 				status = 400
 			default:
@@ -109,7 +101,7 @@ func (s *Service) regEndpoint(ctx context.Context, path, method string, handler 
 			}
 		}
 
-		renderContent(c, status, gin.H{"data": res, "error": errMsg})
+		renderContent(c, status, gin.H{"data": res, "error": helpers.NewErrorFromError(err)})
 	})
 }
 

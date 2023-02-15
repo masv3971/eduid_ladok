@@ -7,21 +7,19 @@ import (
 	"eduid_ladok/pkg/model"
 )
 
-// Client holds the publicapi object
+// Client holds the public api object
 type Client struct {
-	config      *model.Cfg
-	logger      *logger.Logger
-	ladoks      map[string]*ladok.Service
-	schoolNames []string
+	config         *model.Cfg
+	logger         *logger.Logger
+	ladokInstances map[string]*ladok.Service
 }
 
-// New creates a new instance of publicapi
-func New(ctx context.Context, config *model.Cfg, ladoks map[string]*ladok.Service, logger *logger.Logger) (*Client, error) {
+// New creates a new instance of the public api
+func New(ctx context.Context, config *model.Cfg, ladokInstances map[string]*ladok.Service, logger *logger.Logger) (*Client, error) {
 	c := &Client{
-		config:      config,
-		logger:      logger,
-		ladoks:      ladoks,
-		schoolNames: []string{"kf", "lnu"}, // TODO(masv): "fix this!"
+		config:         config,
+		logger:         logger,
+		ladokInstances: ladokInstances,
 	}
 
 	c.logger.Info("Started")

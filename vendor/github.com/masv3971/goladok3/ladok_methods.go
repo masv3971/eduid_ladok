@@ -2,20 +2,13 @@ package goladok3
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/masv3971/goladok3/ladoktypes"
 )
 
 // CheckPermission compare ladok permissions with ps
 func (c *Client) CheckPermission(ctx context.Context, myPermissions Permissions) error {
-	ctx, span := c.tp.Start(ctx, "goladok3.CheckPermission")
-	defer span.End()
-
-	var (
-		e             = &Errors{}
-		internalError = []ladoktypes.InternalError{}
-	)
+	permissionErrors := ladoktypes.PermissionErrors{}
 
 	egna, _, err := c.Kataloginformation.GetAnvandarbehorighetEgna(ctx)
 	if err != nil {
@@ -23,7 +16,7 @@ func (c *Client) CheckPermission(ctx context.Context, myPermissions Permissions)
 	}
 
 	if len(egna.Anvandarbehorighet) < 1 {
-		return ErrNotSufficientPermissions
+		return ladoktypes.ErrNotSufficientPermissions
 	}
 
 	ladokProfile, _, err := c.Kataloginformation.GetBehorighetsprofil(ctx, &GetBehorighetsprofilerReq{UID: egna.Anvandarbehorighet[0].BehorighetsprofilRef.UID})
@@ -45,9 +38,10 @@ func (c *Client) CheckPermission(ctx context.Context, myPermissions Permissions)
 		ladokPermission, ok := data["ladok"]
 		if !ok {
 			// Ladok does not have the required permission
-			internalError = append(internalError, ladoktypes.InternalError{
-				Msg:  fmt.Sprintf("Missing ladok permission id: %d (%s), permission level: %q", permissionID, c.translateID(ctx, permissionID), c.translatePermission(ctx, data["my"])),
-				Type: "Ladok permission",
+			permissionErrors = append(permissionErrors, ladoktypes.PermissionError{
+				Msg:                 "Missing ladok permission",
+				MissingPermissionID: permissionID,
+				PermissionLevel:     c.translatePermission(ctx, data["my"]),
 			})
 			continue
 		}
@@ -55,25 +49,22 @@ func (c *Client) CheckPermission(ctx context.Context, myPermissions Permissions)
 		if !c.comparePermission(ctx, ladokPermission, myPermission) {
 			// ladokPermission does not reach myPermission
 			myPermission := data["my"]
-			internalError = append(internalError, ladoktypes.InternalError{
-				Msg:  fmt.Sprintf("Not sufficient permission: %q for id: %d (%s)", c.translatePermission(ctx, myPermission), permissionID, c.translateID(ctx, permissionID)),
-				Type: "Ladok permission",
+			permissionErrors = append(permissionErrors, ladoktypes.PermissionError{
+				Msg:                 "Not sufficient permission",
+				MissingPermissionID: permissionID,
+				PermissionLevel:     c.translatePermission(ctx, myPermission),
 			})
 		}
 	}
-	if len(internalError) > 0 {
-		e.Internal = internalError
-		return e
 
+	if len(permissionErrors) > 0 {
+		return permissionErrors
 	}
 	return nil
 }
 
 // comparePermission compare l with m permission.
 func (c *Client) comparePermission(ctx context.Context, l, m int64) bool {
-	ctx, span := c.tp.Start(ctx, "goladok3.comparePermission")
-	defer span.End()
-
 	if l == m {
 		return true
 	}
@@ -94,22 +85,16 @@ func (c *Client) comparePermission(ctx context.Context, l, m int64) bool {
 
 // permissionUnify convert ladok permission structure to something that's easier to compare.
 func (c *Client) permissionUnify(ctx context.Context, l ladoktypes.KataloginformationBehorighetsprofil, p Permissions) (permissions map[int64]map[string]int64, err error) {
-	ctx, span := c.tp.Start(ctx, "goladok3.permissionUnify")
-	defer span.End()
-
 	if len(l.Systemaktiviteter) == 0 {
-		return nil, ErrNotSufficientPermissions
+		return nil, ladoktypes.ErrNotSufficientPermissions
 	}
 	if len(p) == 0 {
-		return nil, ErrNoPermissionProvided
+		return nil, ladoktypes.ErrNoPermissionProvided
 	}
 
 	permissions = make(map[int64]map[string]int64)
 
-	parse := func(ctx context.Context, permission, className string, classMap map[string]int64, key int64, store map[int64]map[string]int64) {
-		ctx, span := c.tp.Start(ctx, "goladok3.parse")
-		defer span.End()
-
+	parse := func(permission, className string, classMap map[string]int64, key int64, store map[int64]map[string]int64) {
 		switch permission {
 		case "rattighetsniva.las":
 			classMap[className] = 4
@@ -122,7 +107,7 @@ func (c *Client) permissionUnify(ctx context.Context, l ladoktypes.Kataloginform
 
 	for key, permission := range p {
 		classMyMap := make(map[string]int64)
-		parse(ctx, permission, "my", classMyMap, key, permissions)
+		parse(permission, "my", classMyMap, key, permissions)
 		permissions[key] = classMyMap
 	}
 
@@ -130,7 +115,7 @@ func (c *Client) permissionUnify(ctx context.Context, l ladoktypes.Kataloginform
 		classMap := make(map[string]int64)
 		key := sys.ID
 		permission := sys.Rattighetsniva
-		parse(ctx, permission, "ladok", classMap, key, permissions)
+		parse(permission, "ladok", classMap, key, permissions)
 		val, ok := permissions[key]
 		if ok {
 			val["ladok"] = classMap["ladok"]
@@ -144,9 +129,6 @@ func (c *Client) permissionUnify(ctx context.Context, l ladoktypes.Kataloginform
 }
 
 func (c *Client) translatePermission(ctx context.Context, p int64) string {
-	ctx, span := c.tp.Start(ctx, "goladok3.translatePermission")
-	defer span.End()
-
 	switch p {
 	case 0:
 		return "NoPermission"
@@ -159,30 +141,45 @@ func (c *Client) translatePermission(ctx context.Context, p int64) string {
 	}
 }
 
-func (c *Client) translateID(ctx context.Context, p int64) string {
-	ctx, span := c.tp.Start(ctx, "goladok3.translateID")
-	defer span.End()
+// PermissionID is a map of permissionID and permission
+var PermissionID = map[int64]string{
+	1008:   "examen.allt.las",
+	11004:  "kataloginformation.las",
+	21008:  "kataloginformationbehorighet.behorigheter.allt.las",
+	21010:  "kataloginformationbehorighet.anvandare.las",
+	31001:  "resultat.las",
+	51001:  "studiedeltagande.las",
+	51012:  "studiedeltagande.lasa_studieavgiftsbetalning_anmalningsavgiftsbetalning",
+	51014:  "studiedeltagande.lasa_aktivitet_och_finansiering",
+	51051:  "studiedeltagande.las.aktorer",
+	51053:  "studiedeltagande.las.anknytning",
+	51056:  "studiedeltagande.las.ej_hanterad_antagning",
+	51058:  "studiedeltagande.las.dokumenteradebeslut",
+	51060:  "studiedeltagande.las.grupper",
+	51063:  "studiedeltagande.las.anteckning",
+	51066:  "studiedeltagande.las.studiebehorigheter",
+	51067:  "studiedeltagande.las.tillfallesantagningar",
+	51070:  "studiedeltagande.kontrollera.mot.kurs",
+	61001:  "studentinformation.lasa",
+	61009:  "studentinformation.student.lasa",
+	71001:  "utbildningsinformation.allman.las",
+	90019:  "uppfoljning.feeds",
+	91001:  "uppfoljning.allman.las",
+	91011:  "uppfoljning.population.student.sok",
+	91012:  "uppfoljning.population.student.addresslista",
+	101030: "arendestod.las",
+	860131: "extintegration.lasa",
+}
 
-	switch p {
-	case 90019:
-		return "uppfoljning.feeds"
-	case 51001:
-		return "studiedeltagande.las"
-	case 61001:
-		return "studentinformation.lasa"
-	case 11004:
-		return "kataloginformation.las"
-	case 860131:
-		return "extintegration.lasa"
-	default:
-		return "Undefined"
+func (c *Client) translateID(p int64) string {
+	d, ok := PermissionID[p]
+	if !ok {
+		return "undefined"
 	}
+	return d
 }
 
 func (c *Client) environment(ctx context.Context) (string, error) {
-	ctx, span := c.tp.Start(ctx, "goladok3.environment")
-	defer span.End()
-
 	switch c.certificate.Subject.OrganizationalUnit[1] {
 	case ladoktypes.EnvIntTestAPI:
 		return ladoktypes.EnvIntTestAPI, nil
@@ -191,6 +188,45 @@ func (c *Client) environment(ctx context.Context) (string, error) {
 	case ladoktypes.EnvTestAPI:
 		return ladoktypes.EnvTestAPI, nil
 	default:
-		return "", ErrNoEnvFound
+		return "", ladoktypes.ErrNoEnvFound
 	}
+}
+
+// StudentDegree is a student degree.
+type StudentDegree struct {
+	Name string `json:"name"`
+}
+
+// MyStudentDegrees array of student degrees.
+type MyStudentDegrees []StudentDegree
+
+// MarshalPDF marshal MyStudentDegrees to PDF.
+func (degrees *MyStudentDegrees) MarshalPDF() {}
+
+// GetMyStudentDegrees get student data.
+func (c *Client) GetMyStudentDegrees(ctx context.Context) (MyStudentDegrees, error) {
+	myStudentDegrees := []StudentDegree{}
+
+	return myStudentDegrees, nil
+}
+
+// IsStudentReq is a request to check if a user is a student.
+type IsStudentReq struct {
+	UID          string `validate:"required_without_all=Personnummer ExterntUID"`
+	ExterntUID   string `validate:"required_without_all=Personnummer UID"`
+	Personnummer string `validate:"required_without_all=UID ExterntUID"`
+}
+
+// IsStudent check if requested user is a student.
+func (c *Client) IsStudent(ctx context.Context, req *IsStudentReq) (bool, error) {
+	getStudentReq := &GetStudentReq{
+		UID:          req.UID,
+		ExterntUID:   req.ExterntUID,
+		Personnummer: req.Personnummer,
+	}
+	_, _, err := c.Studentinformation.GetStudent(ctx, getStudentReq)
+	if err != nil {
+		return false, err
+	}
+	return false, nil
 }

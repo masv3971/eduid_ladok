@@ -2,32 +2,32 @@
 version: "3"
 
 services:
- eduid_ladok:
-    container_name: "eduid_ladok"
+  eduid_ladok:
+    container_name: "eduid_ladok_service"
     build:
       context: .
-    image: eduid_ladok
+    image: eduid_ladok:latest
     volumes:
       - eduid_ladok:/data
       - ./cert:/cert:ro
-      - ./dev-config.yaml:/dev-config.yaml:ro
+      - ./dev-config-docker.yaml:/config.yaml:ro
     depends_on:
       - redis
     networks:
       eduid_ladok-net:
-        ipv4_address: 172.16.20.2
+        ipv4_address: 172.16.40.2
     expose:
       - 8080
     environment:
-      - "EDUID_CONFIG_YAML=dev-config.yaml"
+      - "EDUID_CONFIG_YAML=config.yaml"
       - "HTTP_PROXY=haproxy:8080"
       #- "http_proxy=http://proxy.dev.eduid.se:8080"
       #- "HTTPS_PROXY=http://proxy.dev.eduid.se:8080"
       #- "https_proxy=http://proxy.dev.eduid.se:8080"
 
- redis:
+  redis:
     image: redis:alpine
-    container_name: "redis"
+    container_name: "eduid_ladok_redis"
     expose:
       - 6379
     volumes:
@@ -35,27 +35,7 @@ services:
     command: redis-server --appendonly yes
     networks:
       eduid_ladok-net:
-        ipv4_address: 172.16.20.3
-
- haproxy:
-    image: 'docker.sunet.se/eduid/haproxy:latest'
-    restart: always
-    ports:
-      - 8443:443
-    networks:
-      eduid_ladok-net:
-        ipv4_address: 172.16.20.4
-    volumes:
-      - ./haproxy.cfg:/haproxy.cfg
-      - ./pki/eduid_ladok.crt:/etc/ssl/eduid_ladok.crt:ro
-      #- /opt/eduid/ladok-haproxy/etc/:/etc/haproxy/:ro
-      #- '/etc/ssl/private/worker-tug-1.eduid.se_haproxy.crt:/etc/ssl/private/worker-tug-1.eduid.se_haproxy.crt:ro'
-      - /tmp/halog:/dev/log
-      - 'haproxy_control:/var/run/haproxy-control'
-    links:
-      - eduid_ladok
-    depends_on:
-      - eduid_ladok
+        ipv4_address: 172.16.40.3
 
 networks:
   eduid_ladok-net:
@@ -65,8 +45,8 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.16.20.0/24
+        - subnet: 172.16.40.0/24
 volumes:
-    redis_data:
-    eduid_ladok:
-    haproxy_control:
+  redis_data:
+  eduid_ladok:
+  haproxy_control:
