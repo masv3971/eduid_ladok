@@ -2,9 +2,10 @@ package ladok
 
 import (
 	"context"
+	"time"
+
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
-	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/masv3971/goladok3"
@@ -43,13 +44,13 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 		})
 	}
 
-	// Non intrusive check if redis is reachable, this will not stop the program even if non contactable.
+	// Non-intrusive check if redis is reachable, this will not stop the program even if non-contactable.
 	if status := s.StatusRedis(ctx); !status.Healthy {
 		s.logger.Error("Cant connect to redis")
 	}
 
 	var err error
-	s.ladok, err = goladok3.New(goladok3.Config{
+	s.ladok, err = goladok3.NewX509(goladok3.X509Config{
 		URL: s.Service.config.Ladok.URL,
 		//ProxyURL:       s.Service.config.HTTPProxy, //TODO(masv): Can I remove this?
 		Certificate:    s.Service.Certificate.Cert,

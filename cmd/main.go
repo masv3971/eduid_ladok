@@ -2,6 +2,11 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
 	"eduid_ladok/internal/aggregate"
 	"eduid_ladok/internal/apiv1"
 	"eduid_ladok/internal/httpserver"
@@ -9,10 +14,6 @@ import (
 	"eduid_ladok/pkg/configuration"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
 )
 
 type service interface {
@@ -24,10 +25,10 @@ func main() {
 	ctx := context.Background()
 
 	var (
-		log      *logger.Logger
-		mainLog  *logger.Logger
-		services = make(map[string]map[string]service)
-		ladoks   = make(map[string]*ladok.Service)
+		log            *logger.Logger
+		mainLog        *logger.Logger
+		services       = make(map[string]map[string]service)
+		ladokInstances = make(map[string]*ladok.Service)
 	)
 
 	cfg, err := configuration.Parse(logger.NewSimple("Configuration"))
@@ -44,7 +45,7 @@ func main() {
 		s := make(map[string]service)
 
 		ladok, err := ladok.New(ctx, cfg, wg, schoolName, ladokToAggregateChan, log.New(schoolName).New("ladok"))
-		ladoks[schoolName] = ladok
+		ladokInstances[schoolName] = ladok
 		s["ladok"] = ladok
 		if err != nil {
 			panic(err)
@@ -60,7 +61,7 @@ func main() {
 
 	s := make(map[string]service)
 
-	apiv1, err := apiv1.New(ctx, cfg, ladoks, log.New("apiv1"))
+	apiv1, err := apiv1.New(ctx, cfg, ladokInstances, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}

@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -16,19 +17,20 @@ import (
 
 	"github.com/masv3971/goladok3/ladoktypes"
 	"golang.org/x/time/rate"
-
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/trace"
 )
 
-// Config configures new function
-type Config struct {
+// X509Config configures new function
+type X509Config struct {
 	URL            string            `validate:"required"`
 	Certificate    *x509.Certificate `validate:"required"`
 	CertificatePEM []byte            `validate:"required"`
 	PrivateKey     *rsa.PrivateKey   `validate:"required"`
 	PrivateKeyPEM  []byte            `validate:"required"`
 	ProxyURL       string
+}
+
+// OidcConfig configures NewOIDC function
+type OidcConfig struct {
 }
 
 // Client holds the ladok object
@@ -44,7 +46,6 @@ type Client struct {
 	privateKey     *rsa.PrivateKey
 	privateKeyPEM  []byte
 	proxyURL       string
-	tp             trace.Tracer
 
 	Kataloginformation *kataloginformationService
 	Studentinformation *studentinformationService
@@ -52,8 +53,8 @@ type Client struct {
 	Feed               *feedService
 }
 
-// New create a new instanace of ladok
-func New(config Config) (*Client, error) {
+// NewX509 create a new x509 instance of ladok
+func NewX509(config X509Config) (*Client, error) {
 	if err := Check(config); err != nil {
 		return nil, err
 	}
@@ -66,7 +67,6 @@ func New(config Config) (*Client, error) {
 		certificate:    config.Certificate,
 		privateKey:     config.PrivateKey,
 		rateLimit:      rate.NewLimiter(rate.Every(1*time.Second), 30),
-		tp:             otel.Tracer("goladok3"),
 	}
 
 	if err := c.httpConfigure(); err != nil {
@@ -79,6 +79,11 @@ func New(config Config) (*Client, error) {
 	c.Feed = &feedService{client: c, service: "feed"}
 
 	return c, nil
+}
+
+// NewOIDC create a new OIDC instance of ladok
+func NewOIDC(config OidcConfig) (*Client, error) {
+	return nil, nil
 }
 
 func (c *Client) httpConfigure() error {
@@ -154,17 +159,14 @@ var ladokAcceptHeader = map[string]map[string]string{
 
 // NewRequest make a new request
 func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, path string, body interface{}) (*http.Request, error) {
-	ctx, span := c.tp.Start(ctx, "goladok3.newRequest")
-	defer span.End()
-
 	rel, err := url.Parse(path)
 	if err != nil {
-		return nil, oneError("", "url", "newRequest", err.Error())
+		return nil, err
 	}
 
 	u, err := url.Parse(c.url)
 	if err != nil {
-		return nil, oneError("", "url", "newRequest", err.Error())
+		return nil, err
 	}
 	url := u.ResolveReference(rel)
 
@@ -178,13 +180,13 @@ func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, pa
 		buf = new(bytes.Buffer)
 		err = json.NewEncoder(buf).Encode(payload)
 		if err != nil {
-			return nil, oneError("", "json", "newRequest", err.Error())
+			return nil, err
 		}
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, url.String(), buf)
 	if err != nil {
-		return nil, oneError("", "http.NewRequestWithContext", "newRequest", err.Error())
+		return nil, err
 	}
 
 	if body != nil {
@@ -198,29 +200,26 @@ func (c *Client) newRequest(ctx context.Context, acceptHeader string, method, pa
 
 // Do does the new request
 func (c *Client) do(ctx context.Context, req *http.Request, value interface{}) (*http.Response, error) {
-	ctx, span := c.tp.Start(ctx, "goladok3.do")
-	defer span.End()
-
 	if err := c.rateLimit.Wait(ctx); err != nil {
-		return nil, oneError("", "HTTPClient.Do", "ratelimit", err.Error())
+		return nil, err
 	}
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, oneError("Can't perform http.client.do", "HTTPClient.Do", "do", err.Error())
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if err := checkResponse(resp); err != nil {
 		buf := &bytes.Buffer{}
 		if _, err := buf.ReadFrom(resp.Body); err != nil {
-			return nil, oneError("Can't process buffer", "buf.ReadFrom", "do", err.Error())
+			return nil, err
 		}
 		ladokError := &ladoktypes.LadokError{}
 		if err := json.Unmarshal(buf.Bytes(), ladokError); err != nil { // TODO(masv): Fix xml error parsing into Errors.
-			return nil, oneError("Can't unmarshal json to Errors ", "json.Unmarshal", "do", err.Error())
+			return nil, err
 		}
-		return nil, &Errors{Ladok: ladokError}
+		return nil, ladokError
 	}
 
 	switch resp.Header.Get("Content-Type") {
@@ -233,7 +232,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, value interface{}) (
 			return nil, err
 		}
 	default:
-		return nil, ErrNoValidContentType
+		return nil, ladoktypes.ErrNoValidContentType
 	}
 
 	return resp, nil
@@ -244,15 +243,12 @@ func checkResponse(r *http.Response) error {
 	case 200, 201, 202, 204, 304:
 		return nil
 	case 500:
-		return oneError("Not allowed", "statusCode", "checkResponse", "")
+		return errors.New("Invalid")
 	}
-	return oneError("Invalid request", "statusCode", "checkResponse", "")
+	return errors.New("Invalid request")
 }
 
 func (c *Client) call(ctx context.Context, acceptHeader, method, url string, body, reply interface{}) (*http.Response, error) {
-	ctx, span := c.tp.Start(ctx, "goladok3.call")
-	defer span.End()
-
 	request, err := c.newRequest(
 		ctx,
 		acceptHeader,

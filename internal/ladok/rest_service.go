@@ -2,14 +2,15 @@ package ladok
 
 import (
 	"context"
+	"time"
+
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
-	"time"
 
 	"github.com/masv3971/goladok3"
 )
 
-// RestService holds the restservice
+// RestService holds the rest service
 type RestService struct {
 	Service *Service
 	logger  *logger.Logger
@@ -24,7 +25,7 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 	}
 
 	var err error
-	s.Ladok, err = goladok3.New(goladok3.Config{
+	s.Ladok, err = goladok3.NewX509(goladok3.X509Config{
 		URL:            s.Service.config.Ladok.URL,
 		ProxyURL:       s.Service.config.HTTPProxy,
 		Certificate:    s.Service.Certificate.Cert,
@@ -37,7 +38,7 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 	}
 
 	if err := s.Ladok.CheckPermission(ctx, s.Service.config.Ladok.Permissions); err != nil {
-		s.logger.Warn("Ladok permission", "error", err.Error())
+		s.logger.Warn("Ladok permission", "error", err)
 	}
 
 	s.logger.Info("Started")
@@ -71,7 +72,7 @@ func (s *RestService) StatusLadok(ctx context.Context) *model.Status {
 	return status
 }
 
-// Close closes serice ladok rest
+// Close closes service ladok rest
 func (s *RestService) Close(ctx context.Context) error {
 	s.logger.Info("Quit")
 	ctx.Done()

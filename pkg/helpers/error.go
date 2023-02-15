@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/masv3971/goladok3/ladoktypes"
 	"github.com/moogar0880/problems"
 )
 
@@ -39,17 +40,22 @@ func NewErrorFromError(err error) *Error {
 	if pbErr, ok := err.(*Error); ok {
 		return pbErr
 	}
-	jsonUnmarshalTypeError, ok := err.(*json.UnmarshalTypeError)
-	if ok {
+	if jsonUnmarshalTypeError, ok := err.(*json.UnmarshalTypeError); ok {
 		return &Error{Title: "json_type_error", Details: formatJSONUnmarshalTypeError(jsonUnmarshalTypeError)}
 	}
-	jsonSyntaxError, ok := err.(*json.SyntaxError)
-	if ok {
+	if jsonSyntaxError, ok := err.(*json.SyntaxError); ok {
 		return &Error{Title: "json_syntax_error", Details: map[string]interface{}{"position": jsonSyntaxError.Offset, "error": jsonSyntaxError.Error()}}
 	}
 	if validatorErr, ok := err.(validator.ValidationErrors); ok {
 		return &Error{Title: "validation_error", Details: formatValidationErrors(validatorErr)}
 	}
+	if ladokGoladok3Error, ok := err.(*ladoktypes.LadokError); ok {
+		return &Error{Title: "goladok3_ladok_error", Details: ladokGoladok3Error}
+	}
+	if ladokPermissions, ok := err.(ladoktypes.PermissionErrors); ok {
+		return &Error{Title: "goladok3_permissions_error", Details: ladokPermissions}
+	}
+
 	return NewErrorDetails("internal_server_error", err.Error())
 }
 
@@ -68,6 +74,8 @@ func formatValidationErrors(err validator.ValidationErrors) []map[string]interfa
 	}
 	return v
 }
+
+//func formatLadokError(err ladoktypes.LadokError)
 
 func formatJSONUnmarshalTypeError(err *json.UnmarshalTypeError) []map[string]interface{} {
 	return []map[string]interface{}{

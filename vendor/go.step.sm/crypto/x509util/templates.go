@@ -2,6 +2,8 @@ package x509util
 
 import (
 	"crypto/x509"
+
+	"go.step.sm/crypto/internal/templates"
 )
 
 // Variables used to hold template data.
@@ -14,6 +16,7 @@ const (
 	CertificateRequestKey = "CR"
 	AuthorizationCrtKey   = "AuthorizationCrt"
 	AuthorizationChainKey = "AuthorizationChain"
+	WebhooksKey           = "Webhooks"
 )
 
 // TemplateError represents an error in a template produced by the fail
@@ -26,6 +29,17 @@ type TemplateError struct {
 // template executes the `fail "message"` function.
 func (e *TemplateError) Error() string {
 	return e.Message
+}
+
+// ValidateTemplate validates a text template.
+func ValidateTemplate(text []byte) error {
+	return templates.ValidateTemplate(text)
+}
+
+// ValidateTemplateData validates that template data is
+// valid JSON.
+func ValidateTemplateData(data []byte) error {
+	return templates.ValidateTemplateData(data)
 }
 
 // TemplateData is an alias for map[string]interface{}. It represents the data
@@ -78,6 +92,11 @@ func (t TemplateData) SetSANs(sans []string) {
 	t.Set(SANsKey, CreateSANs(sans))
 }
 
+// SetSubjectAlternativeNames sets the given sans in the template data.
+func (t TemplateData) SetSubjectAlternativeNames(sans ...SubjectAlternativeName) {
+	t.Set(SANsKey, sans)
+}
+
 // SetToken sets the given token in the template data.
 func (t TemplateData) SetToken(v interface{}) {
 	t.Set(TokenKey, v)
@@ -104,7 +123,18 @@ func (t TemplateData) SetAuthorizationCertificateChain(chain interface{}) {
 // SetCertificateRequest sets the given certificate request in the insecure
 // template data.
 func (t TemplateData) SetCertificateRequest(cr *x509.CertificateRequest) {
-	t.SetInsecure(CertificateRequestKey, newCertificateRequest(cr))
+	t.SetInsecure(CertificateRequestKey, NewCertificateRequestFromX509(cr))
+}
+
+// SetWebhook sets the given webhook response in the webhooks template data.
+func (t TemplateData) SetWebhook(webhookName string, data interface{}) {
+	if webhooksMap, ok := t[WebhooksKey].(map[string]interface{}); ok {
+		webhooksMap[webhookName] = data
+	} else {
+		t[WebhooksKey] = map[string]interface{}{
+			webhookName: data,
+		}
+	}
 }
 
 // DefaultLeafTemplate is the default template used to generate a leaf
@@ -192,4 +222,19 @@ const CertificateRequestTemplate = `{{ toJson .Insecure.CR }}`
 const DefaultCertificateRequestTemplate = `{
 	"subject": {{ toJson .Subject }},
 	"sans": {{ toJson .SANs }}
+}`
+
+// DefaultAttestedLeafTemplate is the default template used to generate a leaf
+// certificate from an attestation certificate. The main difference with
+// "DefaultLeafTemplate" is that the extended key usage is limited to
+// "clientAuth".
+const DefaultAttestedLeafTemplate = `{
+	"subject": {{ toJson .Subject }},
+	"sans": {{ toJson .SANs }},
+{{- if typeIs "*rsa.PublicKey" .Insecure.CR.PublicKey }}
+	"keyUsage": ["keyEncipherment", "digitalSignature"],
+{{- else }}
+	"keyUsage": ["digitalSignature"],
+{{- end }}
+	"extKeyUsage": ["clientAuth"]
 }`

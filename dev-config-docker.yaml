@@ -1,0 +1,49 @@
+---
+eduid:
+  worker:
+    common:
+      debug: yes
+    ladok-x:
+      api_server:
+        host: :8080
+    ladok:
+      api_server:
+        host: :8080
+      production: true
+      http_proxy: "some-proxy.se"
+      schools:
+        kf: 
+          swamid_name: student.konstfack.se
+        lnu:
+          swamid_name: lnu.se
+        hb:
+          swamid_name: hb.se
+        ehs:
+          swamid_name: ehs.se
+      ladok:
+        #url: https://api.integrationstest.ladok.se
+        url: https://api.ladok.se
+        certificate:
+          folder: cert
+        atom:
+          periodicity: 60 
+        permissions:
+          11004: "rattighetsniva.las"
+          51001: "rattighetsniva.las"
+          90019: "rattighetsniva.las"
+      eduid:
+        iam:
+          url: https://api.dev.eduid.se/scim/test 
+      sunet:
+        auth:
+          url: https://auth-test.sunet.se 
+      redis:
+        db: 3
+        host: 172.16.40.3:6379
+        sentinel_hosts:
+        #  - localhost:1231
+        #  - localhost:12313
+        sentinel_service_name: redis-cluster
+    x_service:
+      api_server:
+        host: 8080

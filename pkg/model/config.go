@@ -16,7 +16,7 @@ type Cfg struct {
 	} `yaml:"log"`
 
 	Schools map[string]struct {
-		SamlName string `yaml:"saml_name" validate:"required"`
+		SwamidName string `yaml:"swamid_name" validate:"required"`
 	} `yaml:"schools"`
 
 	Ladok struct {

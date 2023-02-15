@@ -2,15 +2,14 @@ package ladok
 
 import (
 	"context"
-	"eduid_ladok/pkg/model"
 	"fmt"
 	"time"
+
+	"eduid_ladok/pkg/model"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/masv3971/goladok3"
 	"github.com/masv3971/goladok3/ladoktypes"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 func (s *AtomService) run(ctx context.Context) {
@@ -35,7 +34,7 @@ func (s *AtomService) run(ctx context.Context) {
 		return
 	}
 	if ids == nil {
-		s.logger.Info("Nothing to process, resting a bit")
+		s.logger.Info(fmt.Sprintf("No feed entry to process, resting for %d seconds", s.Service.config.Ladok.Atom.Periodicity))
 		return
 	}
 
@@ -102,10 +101,6 @@ func (s *AtomService) unprocessedIDs(ctx context.Context, currentID int) ([]int,
 }
 
 func (s *AtomService) addToCache(ctx context.Context, id int) error {
-	ctx, span := otel.Tracer("atom").Start(ctx, "atom.addToCache")
-	span.SetAttributes(attribute.String("SchoolName", s.Service.schoolName))
-	defer span.End()
-
 	if err := s.db.HSet(ctx, s.Service.schoolName, "latest", id).Err(); err != nil {
 		return err
 	}

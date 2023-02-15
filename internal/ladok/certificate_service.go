@@ -38,13 +38,11 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 
 	go func() {
 		for true {
-			msg := fmt.Sprintf("Certificate %q is initialized", s.SHA256Fingerprint)
-			s.logger.Info(msg)
+			s.logger.Info(fmt.Sprintf("Certificate %q is initialized", s.SHA256Fingerprint))
 
 			status, notAfter := s.CheckValidTime(ctx)
 			if status == Cert90DaysWarning {
-				msg := fmt.Sprintf("Certificate %q expiration warning %q", s.SHA256Fingerprint, notAfter)
-				s.logger.Warn(msg)
+				s.logger.Warn(fmt.Sprintf("Certificate %q expiration warning %q", s.SHA256Fingerprint, notAfter))
 			}
 			time.Sleep(24 * time.Hour)
 		}
