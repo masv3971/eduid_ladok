@@ -29,4 +29,5 @@ Integration between eduid and ladok
 ### Local (Linux)
 
 * ```$ make```
+* ```$ ./start_deps.sh```
 * ```$ ./bin/eduid_ladok```
