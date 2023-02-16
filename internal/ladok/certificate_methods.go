@@ -64,6 +64,8 @@ func (s *CertificateService) importCertificate(ctx context.Context) error {
 var (
 	// Cert90DaysWarning 90 days left until not_after
 	Cert90DaysWarning = "CERT_90DAYS_WARNING"
+	// CertExpired is expired
+	CertExpired = "CERT_EXPIRED"
 	// CertOK is ok
 	CertOK = "CERT_OK"
 )
@@ -74,8 +76,15 @@ func (s *CertificateService) CheckValidTime(ctx context.Context) (string, time.T
 	if s.Cert.NotAfter.Before(days90) {
 		return Cert90DaysWarning, s.Cert.NotAfter
 	}
+	if s.Cert.NotAfter.Before(time.Now()) {
+		return CertExpired, s.Cert.NotAfter
+	}
 
 	return CertOK, s.Cert.NotAfter
+}
+
+func certDaysLeft(notAfter time.Time) int {
+	return int(notAfter.Sub(time.Now()).Hours() / 24)
 }
 
 // NewSHA256Fingerprint return fingerprint from a *x509.Certificate certificate

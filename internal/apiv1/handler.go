@@ -84,3 +84,12 @@ func (c *Client) Status(ctx context.Context) (*model.Status, error) {
 
 	return status, nil
 }
+
+// MonitoringCertClient return status for client certificates
+func (c *Client) MonitoringCertClient(ctx context.Context) (*model.MonitoringCertClients, error) {
+	clientCertificates := model.MonitoringCertClients{}
+	for schoolName, ladok := range c.ladokInstances {
+		clientCertificates[schoolName] = ladok.Certificate.ClientCertificateStatus
+	}
+	return &clientCertificates, nil
+}

@@ -38,3 +38,11 @@ func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (interface
 	}
 	return reply, nil
 }
+
+func (s *Service) endpointMonitoringCertClient(ctx context.Context, c *gin.Context) (interface{}, error) {
+	reply, err := s.apiv1.MonitoringCertClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}

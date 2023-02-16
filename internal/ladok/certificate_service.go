@@ -5,22 +5,24 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"eduid_ladok/pkg/logger"
+	"eduid_ladok/pkg/model"
 	"fmt"
 	"time"
 )
 
 // CertificateService holds the certificate object
 type CertificateService struct {
-	Service           *Service
-	logger            *logger.Logger
-	Cert              *x509.Certificate
-	CertPEM           []byte
-	PrivateKey        *rsa.PrivateKey
-	PrivateKeyPEM     []byte
-	ChainPEM          []byte
-	SHA256Fingerprint string
-	Chain             []*x509.Certificate
-	Pkcs12            []byte
+	Service                 *Service
+	logger                  *logger.Logger
+	Cert                    *x509.Certificate
+	CertPEM                 []byte
+	PrivateKey              *rsa.PrivateKey
+	PrivateKeyPEM           []byte
+	ChainPEM                []byte
+	SHA256Fingerprint       string
+	Chain                   []*x509.Certificate
+	Pkcs12                  []byte
+	ClientCertificateStatus *model.MonitoringCertClient
 }
 
 // NewCertificateService creates a new instance of certificate
@@ -39,11 +41,24 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 	go func() {
 		for true {
 			s.logger.Info(fmt.Sprintf("Certificate %q is initialized", s.SHA256Fingerprint))
-
 			status, notAfter := s.CheckValidTime(ctx)
-			if status == Cert90DaysWarning {
-				s.logger.Warn(fmt.Sprintf("Certificate %q expiration warning %q", s.SHA256Fingerprint, notAfter))
+			clientCertificateStatus := &model.MonitoringCertClient{
+				Valid:       true,
+				Fingerprint: s.SHA256Fingerprint,
+				NotAfter:    notAfter,
+				DaysLeft:    certDaysLeft(notAfter),
+				LastChecked: time.Now(),
 			}
+
+			switch status {
+			case Cert90DaysWarning:
+				s.logger.Warn(fmt.Sprintf("Certificate %q expiration warning %q", s.SHA256Fingerprint, notAfter))
+			case CertExpired:
+				s.logger.Error(fmt.Sprintf("Certificate %q is expired %q", s.SHA256Fingerprint, notAfter))
+				clientCertificateStatus.Valid = false
+			}
+
+			s.ClientCertificateStatus = clientCertificateStatus
 			time.Sleep(24 * time.Hour)
 		}
 	}()

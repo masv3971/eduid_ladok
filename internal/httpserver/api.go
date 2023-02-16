@@ -11,4 +11,5 @@ type Apiv1 interface {
 	LadokInfo(ctx context.Context, indata *apiv1.RequestLadokInfo) (*apiv1.ReplyLadokInfo, error)
 	SchoolInfo(ctx context.Context, indata *apiv1.RequestSchoolInfo) (*apiv1.ReplySchoolInfo, error)
 	Status(ctx context.Context) (*model.Status, error)
+	MonitoringCertClient(ctx context.Context) (*model.MonitoringCertClients, error)
 }

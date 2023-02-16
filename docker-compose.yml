@@ -25,6 +25,15 @@ services:
       #- "HTTPS_PROXY=http://proxy.dev.eduid.se:8080"
       #- "https_proxy=http://proxy.dev.eduid.se:8080"
 
+  dev_docker:
+    container_name: "dev_docker"
+    build:
+      context: ./dev_docker
+    image: dev_docker:latest
+    networks:
+      eduid_ladok-net:
+        ipv4_address: 172.16.40.3
+
   redis:
     image: redis:alpine
     container_name: "eduid_ladok_redis"
@@ -35,7 +44,7 @@ services:
     command: redis-server --appendonly yes
     networks:
       eduid_ladok-net:
-        ipv4_address: 172.16.40.3
+        ipv4_address: 172.16.40.4
 
 networks:
   eduid_ladok-net:
