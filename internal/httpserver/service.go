@@ -66,6 +66,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.regEndpoint(ctx, "api/v1/schoolinfo", "GET", s.endpointSchoolInfo)
 
 	s.regEndpoint(ctx, "/health", "GET", s.endpointStatus)
+	s.regEndpoint(ctx, "/monitoring/cert/client", "GET", s.endpointMonitoringCertClient)
 
 	// Run http server
 	go func() {

@@ -11,7 +11,7 @@ build:
 
 test:
 		$(info running tests)
-		go test -v ./...
+		go test -v -cover ./...
 
 update_packages:
 		$(info updating packages)

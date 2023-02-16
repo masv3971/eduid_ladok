@@ -11,12 +11,13 @@ var (
 
 // Status type
 type Status struct {
-	Name       string    `json:"name,omitempty"`
-	SchoolName string    `json:"school_name,omitempty"`
-	Healthy    bool      `json:"healthy,omitempty"`
-	Status     string    `json:"status,omitempty"`
-	Message    string    `json:"message,omitempty"`
-	Timestamp  time.Time `json:"timestamp,omitempty"`
+	Name                      string    `json:"name,omitempty"`
+	SchoolName                string    `json:"school_name,omitempty"`
+	Healthy                   bool      `json:"healthy,omitempty"`
+	Status                    string    `json:"status,omitempty"`
+	Message                   string    `json:"message,omitempty"`
+	Timestamp                 time.Time `json:"timestamp,omitempty"`
+	ClientCertificateWarnings []string  `json:"client_certificates,omitempty"`
 }
 
 // ManyStatus contains many status objects
@@ -38,4 +39,16 @@ func (s ManyStatus) Check() *Status {
 		Timestamp: time.Now(),
 	}
 	return status
+}
+
+// MonitoringCertClients contains status for client certificates
+type MonitoringCertClients map[string]*MonitoringCertClient
+
+// MonitoringCertClient contains status for client certificates
+type MonitoringCertClient struct {
+	Valid       bool      `json:"valid,omitempty"`
+	Fingerprint string    `json:"fingerprint,omitempty"`
+	NotAfter    time.Time `json:"not_after,omitempty"`
+	DaysLeft    int       `json:"days_left,omitempty"`
+	LastChecked time.Time `json:"last_checked,omitempty"`
 }
