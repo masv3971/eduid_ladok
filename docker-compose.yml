@@ -6,6 +6,7 @@ services:
     container_name: "eduid_ladok_service"
     build:
       context: .
+    #image: docker.sunet.se/eduid/eduid_ladok:staging
     image: eduid_ladok:latest
     volumes:
       - eduid_ladok:/data
