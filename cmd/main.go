@@ -46,7 +46,7 @@ func main() {
 		ladokService, err := ladok.New(ctx, cfg, wg, schoolName, ladokToAggregateChan, schoolLog.New("ladokService"))
 		if err != nil {
 			schoolLog.Warn("ladokService", "error", err)
-			break
+			continue
 		}
 		ladokInstances[schoolName] = ladokService
 		s["ladokService"] = ladokService
