@@ -19,6 +19,11 @@ import (
 	"golang.org/x/time/rate"
 )
 
+var (
+	ErrInvalidRequest    = errors.New("Invalid request")
+	ErrNotAllowedRequest = errors.New("Not allowed request")
+)
+
 // X509Config configures new function
 type X509Config struct {
 	URL            string            `validate:"required"`
@@ -109,7 +114,7 @@ func (c *Client) httpConfigure() error {
 		KeyLogWriter:                nil,
 	}
 
-	tlsCfg.BuildNameToCertificate()
+	//	tlsCfg.BuildNameToCertificate()
 
 	c.HTTPClient = &http.Client{
 		Transport: &http.Transport{
@@ -243,9 +248,12 @@ func checkResponse(r *http.Response) error {
 	case 200, 201, 202, 204, 304:
 		return nil
 	case 500:
-		return errors.New("Invalid")
+		return ErrInvalidRequest
+	case 401:
+		return ErrNotAllowedRequest
 	}
-	return errors.New("Invalid request")
+
+	return ErrInvalidRequest
 }
 
 func (c *Client) call(ctx context.Context, acceptHeader, method, url string, body, reply interface{}) (*http.Response, error) {
