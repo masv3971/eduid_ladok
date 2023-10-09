@@ -25,8 +25,6 @@ func main() {
 	ctx := context.Background()
 
 	var (
-		log            *logger.Logger
-		mainLog        *logger.Logger
 		services       = make(map[string]map[string]service)
 		ladokInstances = make(map[string]*ladok.Service)
 	)
@@ -36,22 +34,26 @@ func main() {
 		panic(err)
 	}
 
-	mainLog = logger.New("main", cfg.Production)
-	log = logger.New("eduid_ladok", cfg.Production)
+	log := logger.New("eduid_ladok", cfg.Production)
+	mainLog := log.New("main")
 
 	for schoolName := range cfg.Schools {
 		ladokToAggregateChan := make(chan *model.LadokToAggregateMSG, 1000)
 
 		s := make(map[string]service)
+		schoolLog := log.New(schoolName)
 
-		ladok, err := ladok.New(ctx, cfg, wg, schoolName, ladokToAggregateChan, log.New(schoolName).New("ladok"))
-		ladokInstances[schoolName] = ladok
-		s["ladok"] = ladok
+		ladokService, err := ladok.New(ctx, cfg, wg, schoolName, ladokToAggregateChan, schoolLog.New("ladokService"))
 		if err != nil {
-			panic(err)
+			schoolLog.Warn("ladokService", "error", err)
+			//fmt.Println("ladokService", err)
+			break
+			//panic(err)
 		}
-		aggregate, err := aggregate.New(ctx, cfg, wg, schoolName, ladok, log.New(schoolName).New("aggregate"))
-		s["aggregate"] = aggregate
+		ladokInstances[schoolName] = ladokService
+		s["ladokService"] = ladokService
+		aggregateService, err := aggregate.New(ctx, cfg, wg, schoolName, ladokService, schoolLog.New("aggregateService"))
+		s["aggregateService"] = aggregateService
 		if err != nil {
 			panic(err)
 		}

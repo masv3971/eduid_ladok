@@ -46,7 +46,7 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 
 	// Non-intrusive check if redis is reachable, this will not stop the program even if non-contactable.
 	if status := s.StatusRedis(ctx); !status.Healthy {
-		s.logger.Error("Cant connect to redis")
+		s.logger.Warn("Cant connect to redis")
 	}
 
 	var err error

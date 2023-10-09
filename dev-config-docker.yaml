@@ -29,8 +29,11 @@ eduid:
           periodicity: 60
         permissions:
           11004: "rattighetsniva.las"
-          51001: "rattighetsniva.las"
-          90019: "rattighetsniva.las"
+          61001: "studentinformation.lasa"
+          40001: "common.publik_feed"
+
+        #  51001: "rattighetsniva.las"
+        #  90019: "rattighetsniva.las"
       eduid:
         iam:
           url: https://api.dev.eduid.se/scim/test

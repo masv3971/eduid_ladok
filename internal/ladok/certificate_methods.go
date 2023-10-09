@@ -6,7 +6,6 @@ import (
 	"eduid_ladok/pkg/model"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -27,7 +26,7 @@ func (s *CertificateService) importCertificate(ctx context.Context) error {
 		}
 	}
 
-	certFile, err := ioutil.ReadFile(certPath)
+	certFile, err := os.ReadFile(certPath)
 	if err != nil {
 		return err
 	}
@@ -41,7 +40,7 @@ func (s *CertificateService) importCertificate(ctx context.Context) error {
 		return err
 	}
 
-	keyFile, err := ioutil.ReadFile(keyPath)
+	keyFile, err := os.ReadFile(keyPath)
 	if err != nil {
 		return err
 	}
@@ -55,7 +54,8 @@ func (s *CertificateService) importCertificate(ctx context.Context) error {
 	}
 
 	if s.isCertificateInvalid(ctx) {
-		return model.ErrCertificateNotValid
+		s.logger.Warn(model.ErrCertificateNotValid.Error())
+		//return model.ErrCertificateNotValid
 	}
 
 	return nil

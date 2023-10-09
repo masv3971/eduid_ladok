@@ -3,11 +3,13 @@ version: "3"
 
 services:
   eduid_ladok:
-    container_name: "eduid_ladok_service"
-    build:
-      context: .
-    #image: docker.sunet.se/eduid/eduid_ladok:staging
-    image: eduid_ladok:latest
+    container_name: "eduid_ladok"
+    image: docker.sunet.se/eduid/eduid_ladok:latest
+    healthcheck:
+      test: curl --fail http://eduid_ladok:8080/health || exit 1
+      interval: 20s
+      retries: 5
+      timeout: 10s
     volumes:
       - eduid_ladok:/data
       - ./cert:/cert:ro
@@ -15,25 +17,19 @@ services:
     depends_on:
       - redis
     networks:
-      eduid_ladok-net:
-        ipv4_address: 172.16.40.2
-    expose:
-      - 8080
+      - eduid_ladok-net
     environment:
       - "EDUID_CONFIG_YAML=config.yaml"
       - "HTTP_PROXY=haproxy:8080"
-      #- "http_proxy=http://proxy.dev.eduid.se:8080"
-      #- "HTTPS_PROXY=http://proxy.dev.eduid.se:8080"
-      #- "https_proxy=http://proxy.dev.eduid.se:8080"
 
-  dev_docker:
-    container_name: "dev_docker"
-    build:
-      context: ./dev_docker
-    image: dev_docker:latest
-    networks:
-      eduid_ladok-net:
-        ipv4_address: 172.16.40.3
+  #dev_docker:
+  #  container_name: "dev_docker"
+  #  build:
+  #    context: ./dev_docker
+  #  image: dev_docker:latest
+  #  networks:
+  #    eduid_ladok-net:
+  #      ipv4_address: 172.16.40.3
 
   redis:
     image: redis:alpine
@@ -44,8 +40,7 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes
     networks:
-      eduid_ladok-net:
-        ipv4_address: 172.16.40.4
+      - eduid_ladok-net
 
 networks:
   eduid_ladok-net:
@@ -56,6 +51,7 @@ networks:
       driver: default
       config:
         - subnet: 172.16.40.0/24
+
 volumes:
   redis_data:
   eduid_ladok:

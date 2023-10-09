@@ -1,7 +1,5 @@
 package model
 
-import "github.com/masv3971/goladok3"
-
 // Cfg is the main configuration structure for this application
 type Cfg struct {
 	APIServer struct {
@@ -27,7 +25,6 @@ type Cfg struct {
 		Atom struct {
 			Periodicity int `yaml:"periodicity"`
 		} `yaml:"atom"`
-		Permissions goladok3.Permissions `yaml:"permissions"`
 	} `yaml:"ladok"`
 
 	EduID struct {

@@ -1,14 +1,15 @@
 ## Compile
-FROM golang:1.20.1 AS builder
+FROM golang:latest AS builder
 
 WORKDIR /go/src/app
 
 COPY . .
 
 RUN make
+#RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_issuer -ldflags "-w -s --extldflags '-static'" ./cmd/issuer/main.go
 
 ## Deploy
-FROM debian:bullseye
+FROM debian:bookworm-slim
 
 WORKDIR /
 
@@ -17,6 +18,5 @@ RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/app/bin/eduid_ladok /eduid_ladok
 
-HEALTHCHECK --interval=27s --timeout=30s CMD curl --connect-timeout 5 http://localhost:8080/health | grep -q STATUS_OK
-
 CMD [ "./eduid_ladok" ]
+

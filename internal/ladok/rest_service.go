@@ -37,10 +37,6 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 		return nil, err
 	}
 
-	if err := s.Ladok.CheckPermission(ctx, s.Service.config.Ladok.Permissions); err != nil {
-		s.logger.Warn("Ladok permission", "error", err)
-	}
-
 	s.logger.Info("Started")
 	return s, nil
 }
