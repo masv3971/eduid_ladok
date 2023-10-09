@@ -44,14 +44,16 @@ func main() {
 
 		s := make(map[string]service)
 
-		ladok, err := ladok.New(ctx, cfg, wg, schoolName, ladokToAggregateChan, log.New(schoolName).New("ladok"))
-		ladokInstances[schoolName] = ladok
-		s["ladok"] = ladok
+		ladokService, err := ladok.New(ctx, cfg, wg, schoolName, ladokToAggregateChan, log.New(schoolName).New("ladok"))
 		if err != nil {
-			panic(err)
+			mainLog.Error("invalid cert for", schoolName)
+			continue
 		}
-		aggregate, err := aggregate.New(ctx, cfg, wg, schoolName, ladok, log.New(schoolName).New("aggregate"))
-		s["aggregate"] = aggregate
+		ladokInstances[schoolName] = ladokService
+		s["ladok"] = ladokService
+
+		aggregateService, err := aggregate.New(ctx, cfg, wg, schoolName, ladokService, log.New(schoolName).New("aggregate"))
+		s["aggregate"] = aggregateService
 		if err != nil {
 			panic(err)
 		}
