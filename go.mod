@@ -33,7 +33,7 @@ require (
 	github.com/benbjohnson/clock v1.1.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
-	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 )
 
 require (
