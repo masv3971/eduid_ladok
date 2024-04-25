@@ -29,9 +29,9 @@ type X509Config struct {
 	URL            string            `validate:"required"`
 	Certificate    *x509.Certificate `validate:"required"`
 	CertificatePEM []byte            `validate:"required"`
-	PrivateKey     *rsa.PrivateKey   `validate:"required"`
-	PrivateKeyPEM  []byte            `validate:"required"`
-	ProxyURL       string
+	//PrivateKey     *rsa.PrivateKey   `validate:"required"`
+	PrivateKeyPEM []byte `validate:"required"`
+	ProxyURL      string
 }
 
 // OidcConfig configures NewOIDC function
@@ -70,8 +70,8 @@ func NewX509(config X509Config) (*Client, error) {
 		privateKeyPEM:  config.PrivateKeyPEM,
 		certificatePEM: config.CertificatePEM,
 		certificate:    config.Certificate,
-		privateKey:     config.PrivateKey,
-		rateLimit:      rate.NewLimiter(rate.Every(1*time.Second), 30),
+		//privateKey:     config.PrivateKey,
+		rateLimit: rate.NewLimiter(rate.Every(1*time.Second), 30),
 	}
 
 	if err := c.httpConfigure(); err != nil {
