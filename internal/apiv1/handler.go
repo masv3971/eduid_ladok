@@ -60,7 +60,7 @@ func (c *Client) SchoolInfo(ctx context.Context, indata *RequestSchoolInfo) (*Re
 	sn := make(map[string]model.SchoolInfo)
 
 	for schoolName := range c.config.Schools {
-		schoolInfo, ok := model.Schools[schoolName]
+		schoolInfo, ok := c.config.SchoolInformation[schoolName]
 		if ok {
 			sn[schoolName] = schoolInfo
 		}

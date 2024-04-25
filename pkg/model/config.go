@@ -17,6 +17,9 @@ type Cfg struct {
 		SwamidName string `yaml:"swamid_name" validate:"required"`
 	} `yaml:"schools"`
 
+	// SchoolInformation holds information of schools
+	SchoolInformation map[string]SchoolInfo `yaml:"school_information"`
+
 	Ladok struct {
 		URL         string `yaml:"url"`
 		Certificate struct {

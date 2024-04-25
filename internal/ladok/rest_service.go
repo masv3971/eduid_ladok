@@ -30,7 +30,6 @@ func NewRestService(ctx context.Context, service *Service, logger *logger.Logger
 		ProxyURL:       s.Service.config.HTTPProxy,
 		Certificate:    s.Service.Certificate.Cert,
 		CertificatePEM: s.Service.Certificate.CertPEM,
-		PrivateKey:     s.Service.Certificate.PrivateKey,
 		PrivateKeyPEM:  s.Service.Certificate.PrivateKeyPEM,
 	})
 	if err != nil {

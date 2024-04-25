@@ -46,16 +46,8 @@ func (s *CertificateService) importCertificate(ctx context.Context) error {
 	}
 	s.PrivateKeyPEM = keyFile
 
-	keyBlock, _ := pem.Decode(keyFile)
-	s.PrivateKey, err = x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
-	if err != nil {
-		fmt.Println("parse privatekey")
-		return err
-	}
-
 	if s.isCertificateInvalid(ctx) {
 		s.logger.Warn(model.ErrCertificateNotValid.Error())
-		//return model.ErrCertificateNotValid
 	}
 
 	return nil

@@ -21,9 +21,11 @@ func (s *Service) run(ctx context.Context) {
 			if err != nil {
 				s.logger.Warn(err.Error())
 			}
-			for _, r := range reply.Studentkopplingar {
-				if r.LarosateID == s.ladok.SchoolID {
-					s.logger.Info("Student", r.StudentUID, "is active!")
+			if reply != nil {
+				for _, r := range reply.Studentkopplingar {
+					if r.LarosateID == s.ladok.SchoolID {
+						s.logger.Info("Student", r.StudentUID, "is active!")
+					}
 				}
 			}
 			//userReply, _, err := s.eduidiam.Users.Search(ctx, &goeduidiam.SearchUsersRequest{

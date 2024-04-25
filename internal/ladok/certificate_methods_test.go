@@ -58,7 +58,6 @@ func TestImportCertificate(t *testing.T) {
 			}
 
 			assert.NotNil(t, service.Certificate.Cert)
-			assert.NotNil(t, service.Certificate.PrivateKey)
 
 		})
 	}

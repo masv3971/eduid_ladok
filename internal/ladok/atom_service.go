@@ -51,11 +51,9 @@ func NewAtomService(ctx context.Context, service *Service, channel chan *model.L
 
 	var err error
 	s.ladok, err = goladok3.NewX509(goladok3.X509Config{
-		URL: s.Service.config.Ladok.URL,
-		//ProxyURL:       s.Service.config.HTTPProxy, //TODO(masv): Can I remove this?
+		URL:            s.Service.config.Ladok.URL,
 		Certificate:    s.Service.Certificate.Cert,
 		CertificatePEM: s.Service.Certificate.CertPEM,
-		PrivateKey:     s.Service.Certificate.PrivateKey,
 		PrivateKeyPEM:  s.Service.Certificate.PrivateKeyPEM,
 	})
 	if err != nil {

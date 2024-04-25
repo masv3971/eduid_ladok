@@ -22,15 +22,6 @@ services:
       - "EDUID_CONFIG_YAML=config.yaml"
       - "HTTP_PROXY=haproxy:8080"
 
-  #dev_docker:
-  #  container_name: "dev_docker"
-  #  build:
-  #    context: ./dev_docker
-  #  image: dev_docker:latest
-  #  networks:
-  #    eduid_ladok-net:
-  #      ipv4_address: 172.16.40.3
-
   redis:
     image: redis:alpine
     container_name: "eduid_ladok_redis"

@@ -2,7 +2,6 @@ package ladok
 
 import (
 	"context"
-	"crypto/rsa"
 	"crypto/x509"
 	"eduid_ladok/pkg/logger"
 	"eduid_ladok/pkg/model"
@@ -12,11 +11,11 @@ import (
 
 // CertificateService holds the certificate object
 type CertificateService struct {
-	Service                 *Service
-	logger                  *logger.Logger
-	Cert                    *x509.Certificate
-	CertPEM                 []byte
-	PrivateKey              *rsa.PrivateKey
+	Service *Service
+	logger  *logger.Logger
+	Cert    *x509.Certificate
+	CertPEM []byte
+	//PrivateKey              *rsa.PrivateKey
 	PrivateKeyPEM           []byte
 	ChainPEM                []byte
 	SHA256Fingerprint       string
@@ -52,9 +51,9 @@ func NewCertificateService(ctx context.Context, service *Service, logger *logger
 
 			switch status {
 			case Cert90DaysWarning:
-				s.logger.Warn(fmt.Sprintf("Certificate %q expiration warning %q", s.SHA256Fingerprint, notAfter))
+				s.logger.Warn("expires within 90 days", "cert fingerprint", s.SHA256Fingerprint, "notAfter", notAfter)
 			case CertExpired:
-				s.logger.Error(fmt.Sprintf("Certificate %q is expired %q", s.SHA256Fingerprint, notAfter))
+				s.logger.Error("expired", "cert fingerprint", s.SHA256Fingerprint, "notAfter", notAfter)
 				clientCertificateStatus.Valid = false
 			}
 
